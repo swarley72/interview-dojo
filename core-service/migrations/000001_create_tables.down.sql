@@ -1,0 +1,4 @@
+DROP TABLE IF EXISTS user_progress;
+DROP TABLE IF EXISTS question_tags;
+DROP TABLE IF EXISTS questions;
+DROP TABLE IF EXISTS tags;
