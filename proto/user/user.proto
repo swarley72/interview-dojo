@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package user;
+
+option go_package = "github.com/swarley72/interview-dojo/proto/user";
+
+message User {
+    string id = 1;
+    bool is_super_user = 2;
+    string login = 3;
+}
+
+message RegisterRequest {
+    string login = 1;
+    string password = 2;
+}
+
+message LoginRequest {
+    string login = 1;
+    string password = 2;
+}
+
+message AuthResponse {
+    User user = 1;
+    Token token = 2;
+}
+
+message Token {
+    string access_token = 1;
+    string refresh_token = 2;
+}
+
+message RefreshTokenRequest {
+    string refresh_token = 1;
+}
+
+message ValidateTokenRequest {
+    string access_token = 1;
+}
+
+ message ValidateTokenResponse {
+      string user_id = 1;
+      bool is_super_user = 2;
+  }
+
+message GetUserRequest {
+    string user_id = 1;
+}
+
+service UserService {
+    rpc Register(RegisterRequest) returns (AuthResponse);
+    rpc Login(LoginRequest) returns (AuthResponse);
+    rpc GetUser(GetUserRequest) returns (User);
+    rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse);
+    rpc RefreshToken(RefreshTokenRequest) returns (Token);
+}

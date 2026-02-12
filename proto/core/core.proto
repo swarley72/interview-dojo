@@ -1,0 +1,129 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+package core;
+
+option go_package = "github.com/swarley72/interview-dojo/proto/core";
+
+enum Difficulty {
+    DIFFICULTY_UNSPECIFIED = 0;
+    DIFFICULTY_EASY = 1;
+    DIFFICULTY_MEDIUM = 2;
+    DIFFICULTY_HARD = 3;
+}
+
+enum QuestionType {
+    QUESTION_TYPE_UNSPECIFIED = 0;
+    QUESTION_TYPE_THEORY = 1;
+    QUESTION_TYPE_CODING = 2;
+    QUESTION_TYPE_SYSTEM_DESIGN = 3;
+    QUESTION_TYPE_ALGORITHM = 4;
+}
+
+enum AnswerQuality {
+    ANSWER_QUALITY_AGAIN = 0;
+    ANSWER_QUALITY_HARD = 3;
+    ANSWER_QUALITY_GOOD = 4;
+    ANSWER_QUALITY_EASY = 5;
+}
+
+message Tag {
+    int32 id = 1;
+    string name = 2;
+}
+
+message Question {
+    string id = 1;
+    string title = 2;
+    optional string content_md = 3;
+    string answer_md = 4;
+    Difficulty difficulty = 5;
+    QuestionType type = 6;
+    repeated Tag tags = 7;
+    google.protobuf.Timestamp created_at = 8;
+    google.protobuf.Timestamp updated_at = 9;
+}
+
+message UserProgress {
+    int32 id = 1;
+    string user_id = 2;
+    string question_id = 3;
+    int32 repetitions = 4;
+    float ease_factor = 5;
+    int32 interval_days = 6;
+    google.protobuf.Timestamp last_reviewed_at = 7;
+    google.protobuf.Timestamp next_review_at = 8;
+}
+
+message GetQuestionRequest {
+    string question_id = 1;
+}
+
+message ListQuestionsRequest {
+    int32 limit = 1;
+    int32 offset = 2;
+    QuestionType type = 3;
+}
+
+message ListQuestionsResponse {
+    repeated Question questions = 1;
+    int32 total_count = 2;
+}
+
+message CreateQuestionRequest {
+    string title = 1;
+    optional string content_md = 2;
+    string answer_md = 3;
+    Difficulty difficulty = 4;
+    QuestionType type = 5;
+    repeated Tag tags = 6;
+}
+
+message DeleteQuestionRequest {
+    string question_id = 1;
+}
+
+message UpdateQuestionRequest {
+    string question_id = 1;
+    optional string title = 2;
+    optional string content_md = 3;
+    optional string answer_md = 4;
+    optional QuestionType type = 5;
+    optional Difficulty difficulty = 6;
+    repeated Tag tags = 7;
+}
+
+message ListTagsResponse {
+    repeated Tag tags = 1;
+}
+
+message GetNextQuestionRequest {
+    string user_id = 1;
+}
+
+message GetUserProgressRequest {
+    string question_id = 1;
+    string user_id = 2;
+}
+
+message RecordAnswerRequest {
+    string question_id = 1;
+    string user_id = 2;
+    AnswerQuality answer_quality = 3;
+}
+
+service CoreService {
+    rpc GetQuestion(GetQuestionRequest) returns (Question);
+    rpc ListQuestions(ListQuestionsRequest) returns (ListQuestionsResponse);
+    rpc CreateQuestion(CreateQuestionRequest) returns (Question);
+    rpc DeleteQuestion(DeleteQuestionRequest) returns (google.protobuf.Empty);
+    rpc UpdateQuestion(UpdateQuestionRequest) returns (Question);
+    rpc ListTags(google.protobuf.Empty) returns (ListTagsResponse);
+
+    // Learning
+    rpc GetNextQuestion(GetNextQuestionRequest) returns (Question);
+    rpc GetUserProgress(GetUserProgressRequest) returns (UserProgress);
+    rpc RecordAnswer(RecordAnswerRequest) returns (UserProgress);
+}
