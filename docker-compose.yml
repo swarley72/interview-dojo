@@ -16,3 +16,20 @@ services:
       interval: 20s
       timeout: 5s
       retries: 5
+
+  user-service:
+    build:
+      context: .
+      dockerfile: user-service/Dockerfile
+    container_name: interview-dojo-user-service
+    environment:
+      DATABASE_URL: postgres://kim:kim@postgres:5432/user_service?sslmode=disable
+      GRPC_PORT: 50051
+      JWT_SECRET: super-secret-key-change-me
+      ACCESS_TOKEN_EXP: 15m
+      REFRESH_TOKEN_EXP: 720h
+    ports:
+      - "50051:50051"
+    depends_on:
+      postgres:
+        condition: service_healthy

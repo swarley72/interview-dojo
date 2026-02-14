@@ -7,6 +7,7 @@
 package user
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -477,17 +478,17 @@ var File_proto_user_user_proto protoreflect.FileDescriptor
 
 const file_proto_user_user_proto_rawDesc = "" +
 	"\n" +
-	"\x15proto/user/user.proto\x12\x04user\"P\n" +
+	"\x15proto/user/user.proto\x12\x04user\x1a\x1bbuf/validate/validate.proto\"P\n" +
 	"\x04User\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\"\n" +
 	"\ris_super_user\x18\x02 \x01(\bR\visSuperUser\x12\x14\n" +
-	"\x05login\x18\x03 \x01(\tR\x05login\"C\n" +
-	"\x0fRegisterRequest\x12\x14\n" +
-	"\x05login\x18\x01 \x01(\tR\x05login\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\"@\n" +
-	"\fLoginRequest\x12\x14\n" +
-	"\x05login\x18\x01 \x01(\tR\x05login\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\"Q\n" +
+	"\x05login\x18\x03 \x01(\tR\x05login\"U\n" +
+	"\x0fRegisterRequest\x12\x1d\n" +
+	"\x05login\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x05login\x12#\n" +
+	"\bpassword\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\bpassword\"R\n" +
+	"\fLoginRequest\x12\x1d\n" +
+	"\x05login\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x05login\x12#\n" +
+	"\bpassword\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\bpassword\"Q\n" +
 	"\fAuthResponse\x12\x1e\n" +
 	"\x04user\x18\x01 \x01(\v2\n" +
 	".user.UserR\x04user\x12!\n" +
@@ -501,9 +502,9 @@ const file_proto_user_user_proto_rawDesc = "" +
 	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\"T\n" +
 	"\x15ValidateTokenResponse\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\"\n" +
-	"\ris_super_user\x18\x02 \x01(\bR\visSuperUser\")\n" +
-	"\x0eGetUserRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId2\xa4\x02\n" +
+	"\ris_super_user\x18\x02 \x01(\bR\visSuperUser\"3\n" +
+	"\x0eGetUserRequest\x12!\n" +
+	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId2\xa4\x02\n" +
 	"\vUserService\x125\n" +
 	"\bRegister\x12\x15.user.RegisterRequest\x1a\x12.user.AuthResponse\x12/\n" +
 	"\x05Login\x12\x12.user.LoginRequest\x1a\x12.user.AuthResponse\x12+\n" +
