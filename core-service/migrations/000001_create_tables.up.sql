@@ -24,10 +24,10 @@ CREATE TABLE IF NOT EXISTS user_progress (
     id SERIAL PRIMARY KEY,
     user_id UUID NOT NULL,
     question_id UUID NOT NULL REFERENCES questions(id) ON DELETE CASCADE,
-    repetitions INT NOT NULL DEFAULT 0,
-    ease_factor FLOAT NOT NULL DEFAULT 2.5,
-    interval_days INT NOT NULL DEFAULT 0,
-    last_reviewed_at TIMESTAMPTZ,
-    next_review_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    repetitions INT NOT NULL DEFAULT 0,                             -- сколько раз подряд ответил правильно (quality >= 3)
+    ease_factor FLOAT NOT NULL DEFAULT 2.5,                         -- множитель интервала SM-2 (минимум 1.3, старт 2.5)
+    interval_days INT NOT NULL DEFAULT 0,                           -- через сколько дней показать снова
+    last_reviewed_at TIMESTAMPTZ NOT NULL DEFAULT now(),            -- когда последний раз отвечал
+    next_review_at TIMESTAMPTZ NOT NULL DEFAULT now(),              -- когда показать вопрос в следующий раз
     UNIQUE (user_id, question_id)
 );
