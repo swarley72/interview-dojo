@@ -25,6 +25,8 @@ const (
 	CoreService_CreateQuestion_FullMethodName  = "/core.CoreService/CreateQuestion"
 	CoreService_DeleteQuestion_FullMethodName  = "/core.CoreService/DeleteQuestion"
 	CoreService_UpdateQuestion_FullMethodName  = "/core.CoreService/UpdateQuestion"
+	CoreService_CreateTag_FullMethodName       = "/core.CoreService/CreateTag"
+	CoreService_DeleteTag_FullMethodName       = "/core.CoreService/DeleteTag"
 	CoreService_ListTags_FullMethodName        = "/core.CoreService/ListTags"
 	CoreService_GetNextQuestion_FullMethodName = "/core.CoreService/GetNextQuestion"
 	CoreService_GetUserProgress_FullMethodName = "/core.CoreService/GetUserProgress"
@@ -40,6 +42,8 @@ type CoreServiceClient interface {
 	CreateQuestion(ctx context.Context, in *CreateQuestionRequest, opts ...grpc.CallOption) (*Question, error)
 	DeleteQuestion(ctx context.Context, in *DeleteQuestionRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	UpdateQuestion(ctx context.Context, in *UpdateQuestionRequest, opts ...grpc.CallOption) (*Question, error)
+	CreateTag(ctx context.Context, in *CreateTagRequest, opts ...grpc.CallOption) (*Tag, error)
+	DeleteTag(ctx context.Context, in *DeleteTagRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	ListTags(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ListTagsResponse, error)
 	// Learning
 	GetNextQuestion(ctx context.Context, in *GetNextQuestionRequest, opts ...grpc.CallOption) (*Question, error)
@@ -105,6 +109,26 @@ func (c *coreServiceClient) UpdateQuestion(ctx context.Context, in *UpdateQuesti
 	return out, nil
 }
 
+func (c *coreServiceClient) CreateTag(ctx context.Context, in *CreateTagRequest, opts ...grpc.CallOption) (*Tag, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Tag)
+	err := c.cc.Invoke(ctx, CoreService_CreateTag_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *coreServiceClient) DeleteTag(ctx context.Context, in *DeleteTagRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, CoreService_DeleteTag_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *coreServiceClient) ListTags(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ListTagsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ListTagsResponse)
@@ -154,6 +178,8 @@ type CoreServiceServer interface {
 	CreateQuestion(context.Context, *CreateQuestionRequest) (*Question, error)
 	DeleteQuestion(context.Context, *DeleteQuestionRequest) (*emptypb.Empty, error)
 	UpdateQuestion(context.Context, *UpdateQuestionRequest) (*Question, error)
+	CreateTag(context.Context, *CreateTagRequest) (*Tag, error)
+	DeleteTag(context.Context, *DeleteTagRequest) (*emptypb.Empty, error)
 	ListTags(context.Context, *emptypb.Empty) (*ListTagsResponse, error)
 	// Learning
 	GetNextQuestion(context.Context, *GetNextQuestionRequest) (*Question, error)
@@ -183,6 +209,12 @@ func (UnimplementedCoreServiceServer) DeleteQuestion(context.Context, *DeleteQue
 }
 func (UnimplementedCoreServiceServer) UpdateQuestion(context.Context, *UpdateQuestionRequest) (*Question, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateQuestion not implemented")
+}
+func (UnimplementedCoreServiceServer) CreateTag(context.Context, *CreateTagRequest) (*Tag, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateTag not implemented")
+}
+func (UnimplementedCoreServiceServer) DeleteTag(context.Context, *DeleteTagRequest) (*emptypb.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteTag not implemented")
 }
 func (UnimplementedCoreServiceServer) ListTags(context.Context, *emptypb.Empty) (*ListTagsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListTags not implemented")
@@ -307,6 +339,42 @@ func _CoreService_UpdateQuestion_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CoreService_CreateTag_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateTagRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CoreServiceServer).CreateTag(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CoreService_CreateTag_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CoreServiceServer).CreateTag(ctx, req.(*CreateTagRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CoreService_DeleteTag_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteTagRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CoreServiceServer).DeleteTag(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CoreService_DeleteTag_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CoreServiceServer).DeleteTag(ctx, req.(*DeleteTagRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _CoreService_ListTags_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
@@ -405,6 +473,14 @@ var CoreService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateQuestion",
 			Handler:    _CoreService_UpdateQuestion_Handler,
+		},
+		{
+			MethodName: "CreateTag",
+			Handler:    _CoreService_CreateTag_Handler,
+		},
+		{
+			MethodName: "DeleteTag",
+			Handler:    _CoreService_DeleteTag_Handler,
 		},
 		{
 			MethodName: "ListTags",

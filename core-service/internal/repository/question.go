@@ -10,7 +10,7 @@ type QuestionRepository interface {
 	GetQuestionByID(ctx context.Context, id string) (Question, error)
 	UpdateQuestion(ctx context.Context, id string, question UpdateQuestionParams) (Question, error)
 	DeleteQuestion(ctx context.Context, id string) error
-	ListQuestions(ctx context.Context, filters ListQuestionsFilters) ([]Question, error)
+	ListQuestions(ctx context.Context, filters ListQuestionsFilters) (ListQuestionsResult, error)
 	GetNewQuestionID(ctx context.Context, userID string) (string, error)
 }
 
@@ -19,7 +19,7 @@ type Question struct {
 	Type       string
 	Title      string
 	Difficulty string
-	TagIDs     []int
+	TagIDs     []int32
 	ContentMD  *string
 	AnswerMD   *string
 	CreatedAt  time.Time
@@ -27,7 +27,7 @@ type Question struct {
 }
 
 type CreateQuestionParams struct {
-	TagIDs     []int
+	TagIDs     []int32
 	Type       string
 	Title      string
 	Difficulty string
@@ -41,6 +41,7 @@ type UpdateQuestionParams struct {
 	Difficulty *string
 	ContentMD  *string
 	AnswerMD   *string
+	TagIDs     []int32
 }
 
 type ListQuestionsFilters struct {
@@ -48,4 +49,9 @@ type ListQuestionsFilters struct {
 	Offset     int
 	Type       *string
 	Difficulty *string
+}
+
+type ListQuestionsResult struct {
+	Questions  []Question
+	TotalCount int32
 }

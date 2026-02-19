@@ -20,7 +20,7 @@ func (t *postgresTagRepository) CreateTag(ctx context.Context, name string) (Tag
 	return tag, err
 }
 
-func (t *postgresTagRepository) GetTagByID(ctx context.Context, id int) (Tag, error) {
+func (t *postgresTagRepository) GetTagByID(ctx context.Context, id int32) (Tag, error) {
 	var tag Tag
 	query := `SELECT id, name FROM tags WHERE id = $1`
 	err := t.pool.QueryRow(ctx, query, id).Scan(
@@ -51,7 +51,7 @@ func (t *postgresTagRepository) ListTags(ctx context.Context) ([]Tag, error) {
 	return tags, rows.Err()
 }
 
-func (t *postgresTagRepository) DeleteTag(ctx context.Context, id int) error {
+func (t *postgresTagRepository) DeleteTag(ctx context.Context, id int32) error {
 	query := `DELETE FROM tags WHERE id = $1`
 	_, err := t.pool.Exec(ctx, query, id)
 	return err

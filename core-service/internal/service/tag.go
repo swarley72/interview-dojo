@@ -9,7 +9,7 @@ import (
 
 type TagService interface {
 	CreateTag(ctx context.Context, name string) (repository.Tag, error)
-	DeleteTag(ctx context.Context, id int) error
+	DeleteTag(ctx context.Context, id int32) error
 	ListTags(ctx context.Context) ([]repository.Tag, error)
 }
 
@@ -22,7 +22,7 @@ func (t *tagService) CreateTag(ctx context.Context, name string) (repository.Tag
 	return t.tagRepo.CreateTag(ctx, name)
 }
 
-func (t *tagService) DeleteTag(ctx context.Context, id int) error {
+func (t *tagService) DeleteTag(ctx context.Context, id int32) error {
 	return t.tagRepo.DeleteTag(ctx, id)
 }
 

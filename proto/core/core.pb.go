@@ -239,10 +239,10 @@ type Question struct {
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
 	ContentMd     *string                `protobuf:"bytes,3,opt,name=content_md,json=contentMd,proto3,oneof" json:"content_md,omitempty"`
-	AnswerMd      string                 `protobuf:"bytes,4,opt,name=answer_md,json=answerMd,proto3" json:"answer_md,omitempty"`
+	AnswerMd      *string                `protobuf:"bytes,4,opt,name=answer_md,json=answerMd,proto3,oneof" json:"answer_md,omitempty"`
 	Difficulty    Difficulty             `protobuf:"varint,5,opt,name=difficulty,proto3,enum=core.Difficulty" json:"difficulty,omitempty"`
 	Type          QuestionType           `protobuf:"varint,6,opt,name=type,proto3,enum=core.QuestionType" json:"type,omitempty"`
-	Tags          []*Tag                 `protobuf:"bytes,7,rep,name=tags,proto3" json:"tags,omitempty"`
+	TagIds        []int32                `protobuf:"varint,7,rep,packed,name=tag_ids,json=tagIds,proto3" json:"tag_ids,omitempty"`
 	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -301,8 +301,8 @@ func (x *Question) GetContentMd() string {
 }
 
 func (x *Question) GetAnswerMd() string {
-	if x != nil {
-		return x.AnswerMd
+	if x != nil && x.AnswerMd != nil {
+		return *x.AnswerMd
 	}
 	return ""
 }
@@ -321,9 +321,9 @@ func (x *Question) GetType() QuestionType {
 	return QuestionType_QUESTION_TYPE_UNSPECIFIED
 }
 
-func (x *Question) GetTags() []*Tag {
+func (x *Question) GetTagIds() []int32 {
 	if x != nil {
-		return x.Tags
+		return x.TagIds
 	}
 	return nil
 }
@@ -490,7 +490,8 @@ type ListQuestionsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Limit         int32                  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
 	Offset        int32                  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset,omitempty"`
-	Type          QuestionType           `protobuf:"varint,3,opt,name=type,proto3,enum=core.QuestionType" json:"type,omitempty"`
+	Type          *QuestionType          `protobuf:"varint,3,opt,name=type,proto3,enum=core.QuestionType,oneof" json:"type,omitempty"`
+	Difficulty    *Difficulty            `protobuf:"varint,4,opt,name=difficulty,proto3,enum=core.Difficulty,oneof" json:"difficulty,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -540,10 +541,17 @@ func (x *ListQuestionsRequest) GetOffset() int32 {
 }
 
 func (x *ListQuestionsRequest) GetType() QuestionType {
-	if x != nil {
-		return x.Type
+	if x != nil && x.Type != nil {
+		return *x.Type
 	}
 	return QuestionType_QUESTION_TYPE_UNSPECIFIED
+}
+
+func (x *ListQuestionsRequest) GetDifficulty() Difficulty {
+	if x != nil && x.Difficulty != nil {
+		return *x.Difficulty
+	}
+	return Difficulty_DIFFICULTY_UNSPECIFIED
 }
 
 type ListQuestionsResponse struct {
@@ -602,10 +610,10 @@ type CreateQuestionRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Title         string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
 	ContentMd     *string                `protobuf:"bytes,2,opt,name=content_md,json=contentMd,proto3,oneof" json:"content_md,omitempty"`
-	AnswerMd      string                 `protobuf:"bytes,3,opt,name=answer_md,json=answerMd,proto3" json:"answer_md,omitempty"`
+	AnswerMd      *string                `protobuf:"bytes,3,opt,name=answer_md,json=answerMd,proto3,oneof" json:"answer_md,omitempty"`
 	Difficulty    Difficulty             `protobuf:"varint,4,opt,name=difficulty,proto3,enum=core.Difficulty" json:"difficulty,omitempty"`
 	Type          QuestionType           `protobuf:"varint,5,opt,name=type,proto3,enum=core.QuestionType" json:"type,omitempty"`
-	Tags          []*Tag                 `protobuf:"bytes,6,rep,name=tags,proto3" json:"tags,omitempty"`
+	TagIds        []int32                `protobuf:"varint,6,rep,packed,name=tag_ids,json=tagIds,proto3" json:"tag_ids,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -655,8 +663,8 @@ func (x *CreateQuestionRequest) GetContentMd() string {
 }
 
 func (x *CreateQuestionRequest) GetAnswerMd() string {
-	if x != nil {
-		return x.AnswerMd
+	if x != nil && x.AnswerMd != nil {
+		return *x.AnswerMd
 	}
 	return ""
 }
@@ -675,9 +683,9 @@ func (x *CreateQuestionRequest) GetType() QuestionType {
 	return QuestionType_QUESTION_TYPE_UNSPECIFIED
 }
 
-func (x *CreateQuestionRequest) GetTags() []*Tag {
+func (x *CreateQuestionRequest) GetTagIds() []int32 {
 	if x != nil {
-		return x.Tags
+		return x.TagIds
 	}
 	return nil
 }
@@ -734,7 +742,7 @@ type UpdateQuestionRequest struct {
 	AnswerMd      *string                `protobuf:"bytes,4,opt,name=answer_md,json=answerMd,proto3,oneof" json:"answer_md,omitempty"`
 	Type          *QuestionType          `protobuf:"varint,5,opt,name=type,proto3,enum=core.QuestionType,oneof" json:"type,omitempty"`
 	Difficulty    *Difficulty            `protobuf:"varint,6,opt,name=difficulty,proto3,enum=core.Difficulty,oneof" json:"difficulty,omitempty"`
-	Tags          []*Tag                 `protobuf:"bytes,7,rep,name=tags,proto3" json:"tags,omitempty"`
+	TagIds        []int32                `protobuf:"varint,7,rep,packed,name=tag_ids,json=tagIds,proto3" json:"tag_ids,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -811,11 +819,99 @@ func (x *UpdateQuestionRequest) GetDifficulty() Difficulty {
 	return Difficulty_DIFFICULTY_UNSPECIFIED
 }
 
-func (x *UpdateQuestionRequest) GetTags() []*Tag {
+func (x *UpdateQuestionRequest) GetTagIds() []int32 {
 	if x != nil {
-		return x.Tags
+		return x.TagIds
 	}
 	return nil
+}
+
+type CreateTagRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateTagRequest) Reset() {
+	*x = CreateTagRequest{}
+	mi := &file_proto_core_core_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateTagRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateTagRequest) ProtoMessage() {}
+
+func (x *CreateTagRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_core_core_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateTagRequest.ProtoReflect.Descriptor instead.
+func (*CreateTagRequest) Descriptor() ([]byte, []int) {
+	return file_proto_core_core_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *CreateTagRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+type DeleteTagRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteTagRequest) Reset() {
+	*x = DeleteTagRequest{}
+	mi := &file_proto_core_core_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteTagRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteTagRequest) ProtoMessage() {}
+
+func (x *DeleteTagRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_core_core_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteTagRequest.ProtoReflect.Descriptor instead.
+func (*DeleteTagRequest) Descriptor() ([]byte, []int) {
+	return file_proto_core_core_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *DeleteTagRequest) GetId() int32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
 }
 
 type ListTagsResponse struct {
@@ -827,7 +923,7 @@ type ListTagsResponse struct {
 
 func (x *ListTagsResponse) Reset() {
 	*x = ListTagsResponse{}
-	mi := &file_proto_core_core_proto_msgTypes[9]
+	mi := &file_proto_core_core_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -839,7 +935,7 @@ func (x *ListTagsResponse) String() string {
 func (*ListTagsResponse) ProtoMessage() {}
 
 func (x *ListTagsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_core_core_proto_msgTypes[9]
+	mi := &file_proto_core_core_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -852,7 +948,7 @@ func (x *ListTagsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListTagsResponse.ProtoReflect.Descriptor instead.
 func (*ListTagsResponse) Descriptor() ([]byte, []int) {
-	return file_proto_core_core_proto_rawDescGZIP(), []int{9}
+	return file_proto_core_core_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *ListTagsResponse) GetTags() []*Tag {
@@ -871,7 +967,7 @@ type GetNextQuestionRequest struct {
 
 func (x *GetNextQuestionRequest) Reset() {
 	*x = GetNextQuestionRequest{}
-	mi := &file_proto_core_core_proto_msgTypes[10]
+	mi := &file_proto_core_core_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -883,7 +979,7 @@ func (x *GetNextQuestionRequest) String() string {
 func (*GetNextQuestionRequest) ProtoMessage() {}
 
 func (x *GetNextQuestionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_core_core_proto_msgTypes[10]
+	mi := &file_proto_core_core_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -896,7 +992,7 @@ func (x *GetNextQuestionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetNextQuestionRequest.ProtoReflect.Descriptor instead.
 func (*GetNextQuestionRequest) Descriptor() ([]byte, []int) {
-	return file_proto_core_core_proto_rawDescGZIP(), []int{10}
+	return file_proto_core_core_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *GetNextQuestionRequest) GetUserId() string {
@@ -916,7 +1012,7 @@ type GetUserProgressRequest struct {
 
 func (x *GetUserProgressRequest) Reset() {
 	*x = GetUserProgressRequest{}
-	mi := &file_proto_core_core_proto_msgTypes[11]
+	mi := &file_proto_core_core_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -928,7 +1024,7 @@ func (x *GetUserProgressRequest) String() string {
 func (*GetUserProgressRequest) ProtoMessage() {}
 
 func (x *GetUserProgressRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_core_core_proto_msgTypes[11]
+	mi := &file_proto_core_core_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -941,7 +1037,7 @@ func (x *GetUserProgressRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserProgressRequest.ProtoReflect.Descriptor instead.
 func (*GetUserProgressRequest) Descriptor() ([]byte, []int) {
-	return file_proto_core_core_proto_rawDescGZIP(), []int{11}
+	return file_proto_core_core_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *GetUserProgressRequest) GetQuestionId() string {
@@ -969,7 +1065,7 @@ type RecordAnswerRequest struct {
 
 func (x *RecordAnswerRequest) Reset() {
 	*x = RecordAnswerRequest{}
-	mi := &file_proto_core_core_proto_msgTypes[12]
+	mi := &file_proto_core_core_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -981,7 +1077,7 @@ func (x *RecordAnswerRequest) String() string {
 func (*RecordAnswerRequest) ProtoMessage() {}
 
 func (x *RecordAnswerRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_core_core_proto_msgTypes[12]
+	mi := &file_proto_core_core_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -994,7 +1090,7 @@ func (x *RecordAnswerRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RecordAnswerRequest.ProtoReflect.Descriptor instead.
 func (*RecordAnswerRequest) Descriptor() ([]byte, []int) {
-	return file_proto_core_core_proto_rawDescGZIP(), []int{12}
+	return file_proto_core_core_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *RecordAnswerRequest) GetQuestionId() string {
@@ -1025,23 +1121,25 @@ const file_proto_core_core_proto_rawDesc = "" +
 	"\x15proto/core/core.proto\x12\x04core\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bgoogle/protobuf/empty.proto\")\n" +
 	"\x03Tag\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\"\xef\x02\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\"\xfc\x02\n" +
 	"\bQuestion\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12\"\n" +
 	"\n" +
-	"content_md\x18\x03 \x01(\tH\x00R\tcontentMd\x88\x01\x01\x12\x1b\n" +
-	"\tanswer_md\x18\x04 \x01(\tR\banswerMd\x120\n" +
+	"content_md\x18\x03 \x01(\tH\x00R\tcontentMd\x88\x01\x01\x12 \n" +
+	"\tanswer_md\x18\x04 \x01(\tH\x01R\banswerMd\x88\x01\x01\x120\n" +
 	"\n" +
 	"difficulty\x18\x05 \x01(\x0e2\x10.core.DifficultyR\n" +
 	"difficulty\x12&\n" +
-	"\x04type\x18\x06 \x01(\x0e2\x12.core.QuestionTypeR\x04type\x12\x1d\n" +
-	"\x04tags\x18\a \x03(\v2\t.core.TagR\x04tags\x129\n" +
+	"\x04type\x18\x06 \x01(\x0e2\x12.core.QuestionTypeR\x04type\x12\x17\n" +
+	"\atag_ids\x18\a \x03(\x05R\x06tagIds\x129\n" +
 	"\n" +
 	"created_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
 	"updated_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAtB\r\n" +
-	"\v_content_md\"\xc8\x02\n" +
+	"\v_content_mdB\f\n" +
+	"\n" +
+	"_answer_md\"\xc8\x02\n" +
 	"\fUserProgress\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x1f\n" +
@@ -1055,29 +1153,36 @@ const file_proto_core_core_proto_rawDesc = "" +
 	"\x0enext_review_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\fnextReviewAt\"5\n" +
 	"\x12GetQuestionRequest\x12\x1f\n" +
 	"\vquestion_id\x18\x01 \x01(\tR\n" +
-	"questionId\"l\n" +
+	"questionId\"\xc0\x01\n" +
 	"\x14ListQuestionsRequest\x12\x14\n" +
 	"\x05limit\x18\x01 \x01(\x05R\x05limit\x12\x16\n" +
-	"\x06offset\x18\x02 \x01(\x05R\x06offset\x12&\n" +
-	"\x04type\x18\x03 \x01(\x0e2\x12.core.QuestionTypeR\x04type\"f\n" +
+	"\x06offset\x18\x02 \x01(\x05R\x06offset\x12+\n" +
+	"\x04type\x18\x03 \x01(\x0e2\x12.core.QuestionTypeH\x00R\x04type\x88\x01\x01\x125\n" +
+	"\n" +
+	"difficulty\x18\x04 \x01(\x0e2\x10.core.DifficultyH\x01R\n" +
+	"difficulty\x88\x01\x01B\a\n" +
+	"\x05_typeB\r\n" +
+	"\v_difficulty\"f\n" +
 	"\x15ListQuestionsResponse\x12,\n" +
 	"\tquestions\x18\x01 \x03(\v2\x0e.core.QuestionR\tquestions\x12\x1f\n" +
 	"\vtotal_count\x18\x02 \x01(\x05R\n" +
-	"totalCount\"\xf6\x01\n" +
+	"totalCount\"\x83\x02\n" +
 	"\x15CreateQuestionRequest\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12\"\n" +
 	"\n" +
-	"content_md\x18\x02 \x01(\tH\x00R\tcontentMd\x88\x01\x01\x12\x1b\n" +
-	"\tanswer_md\x18\x03 \x01(\tR\banswerMd\x120\n" +
+	"content_md\x18\x02 \x01(\tH\x00R\tcontentMd\x88\x01\x01\x12 \n" +
+	"\tanswer_md\x18\x03 \x01(\tH\x01R\banswerMd\x88\x01\x01\x120\n" +
 	"\n" +
 	"difficulty\x18\x04 \x01(\x0e2\x10.core.DifficultyR\n" +
 	"difficulty\x12&\n" +
-	"\x04type\x18\x05 \x01(\x0e2\x12.core.QuestionTypeR\x04type\x12\x1d\n" +
-	"\x04tags\x18\x06 \x03(\v2\t.core.TagR\x04tagsB\r\n" +
-	"\v_content_md\"8\n" +
+	"\x04type\x18\x05 \x01(\x0e2\x12.core.QuestionTypeR\x04type\x12\x17\n" +
+	"\atag_ids\x18\x06 \x03(\x05R\x06tagIdsB\r\n" +
+	"\v_content_mdB\f\n" +
+	"\n" +
+	"_answer_md\"8\n" +
 	"\x15DeleteQuestionRequest\x12\x1f\n" +
 	"\vquestion_id\x18\x01 \x01(\tR\n" +
-	"questionId\"\xdb\x02\n" +
+	"questionId\"\xd5\x02\n" +
 	"\x15UpdateQuestionRequest\x12\x1f\n" +
 	"\vquestion_id\x18\x01 \x01(\tR\n" +
 	"questionId\x12\x19\n" +
@@ -1088,14 +1193,18 @@ const file_proto_core_core_proto_rawDesc = "" +
 	"\x04type\x18\x05 \x01(\x0e2\x12.core.QuestionTypeH\x03R\x04type\x88\x01\x01\x125\n" +
 	"\n" +
 	"difficulty\x18\x06 \x01(\x0e2\x10.core.DifficultyH\x04R\n" +
-	"difficulty\x88\x01\x01\x12\x1d\n" +
-	"\x04tags\x18\a \x03(\v2\t.core.TagR\x04tagsB\b\n" +
+	"difficulty\x88\x01\x01\x12\x17\n" +
+	"\atag_ids\x18\a \x03(\x05R\x06tagIdsB\b\n" +
 	"\x06_titleB\r\n" +
 	"\v_content_mdB\f\n" +
 	"\n" +
 	"_answer_mdB\a\n" +
 	"\x05_typeB\r\n" +
-	"\v_difficulty\"1\n" +
+	"\v_difficulty\"&\n" +
+	"\x10CreateTagRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\"\"\n" +
+	"\x10DeleteTagRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x05R\x02id\"1\n" +
 	"\x10ListTagsResponse\x12\x1d\n" +
 	"\x04tags\x18\x01 \x03(\v2\t.core.TagR\x04tags\"1\n" +
 	"\x16GetNextQuestionRequest\x12\x17\n" +
@@ -1125,13 +1234,15 @@ const file_proto_core_core_proto_rawDesc = "" +
 	"\x14ANSWER_QUALITY_AGAIN\x10\x00\x12\x17\n" +
 	"\x13ANSWER_QUALITY_HARD\x10\x03\x12\x17\n" +
 	"\x13ANSWER_QUALITY_GOOD\x10\x04\x12\x17\n" +
-	"\x13ANSWER_QUALITY_EASY\x10\x052\xd6\x04\n" +
+	"\x13ANSWER_QUALITY_EASY\x10\x052\xc3\x05\n" +
 	"\vCoreService\x127\n" +
 	"\vGetQuestion\x12\x18.core.GetQuestionRequest\x1a\x0e.core.Question\x12H\n" +
 	"\rListQuestions\x12\x1a.core.ListQuestionsRequest\x1a\x1b.core.ListQuestionsResponse\x12=\n" +
 	"\x0eCreateQuestion\x12\x1b.core.CreateQuestionRequest\x1a\x0e.core.Question\x12E\n" +
 	"\x0eDeleteQuestion\x12\x1b.core.DeleteQuestionRequest\x1a\x16.google.protobuf.Empty\x12=\n" +
-	"\x0eUpdateQuestion\x12\x1b.core.UpdateQuestionRequest\x1a\x0e.core.Question\x12:\n" +
+	"\x0eUpdateQuestion\x12\x1b.core.UpdateQuestionRequest\x1a\x0e.core.Question\x12.\n" +
+	"\tCreateTag\x12\x16.core.CreateTagRequest\x1a\t.core.Tag\x12;\n" +
+	"\tDeleteTag\x12\x16.core.DeleteTagRequest\x1a\x16.google.protobuf.Empty\x12:\n" +
 	"\bListTags\x12\x16.google.protobuf.Empty\x1a\x16.core.ListTagsResponse\x12?\n" +
 	"\x0fGetNextQuestion\x12\x1c.core.GetNextQuestionRequest\x1a\x0e.core.Question\x12C\n" +
 	"\x0fGetUserProgress\x12\x1c.core.GetUserProgressRequest\x1a\x12.core.UserProgress\x12=\n" +
@@ -1150,7 +1261,7 @@ func file_proto_core_core_proto_rawDescGZIP() []byte {
 }
 
 var file_proto_core_core_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_proto_core_core_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_proto_core_core_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
 var file_proto_core_core_proto_goTypes = []any{
 	(Difficulty)(0),                // 0: core.Difficulty
 	(QuestionType)(0),              // 1: core.QuestionType
@@ -1164,54 +1275,58 @@ var file_proto_core_core_proto_goTypes = []any{
 	(*CreateQuestionRequest)(nil),  // 9: core.CreateQuestionRequest
 	(*DeleteQuestionRequest)(nil),  // 10: core.DeleteQuestionRequest
 	(*UpdateQuestionRequest)(nil),  // 11: core.UpdateQuestionRequest
-	(*ListTagsResponse)(nil),       // 12: core.ListTagsResponse
-	(*GetNextQuestionRequest)(nil), // 13: core.GetNextQuestionRequest
-	(*GetUserProgressRequest)(nil), // 14: core.GetUserProgressRequest
-	(*RecordAnswerRequest)(nil),    // 15: core.RecordAnswerRequest
-	(*timestamppb.Timestamp)(nil),  // 16: google.protobuf.Timestamp
-	(*emptypb.Empty)(nil),          // 17: google.protobuf.Empty
+	(*CreateTagRequest)(nil),       // 12: core.CreateTagRequest
+	(*DeleteTagRequest)(nil),       // 13: core.DeleteTagRequest
+	(*ListTagsResponse)(nil),       // 14: core.ListTagsResponse
+	(*GetNextQuestionRequest)(nil), // 15: core.GetNextQuestionRequest
+	(*GetUserProgressRequest)(nil), // 16: core.GetUserProgressRequest
+	(*RecordAnswerRequest)(nil),    // 17: core.RecordAnswerRequest
+	(*timestamppb.Timestamp)(nil),  // 18: google.protobuf.Timestamp
+	(*emptypb.Empty)(nil),          // 19: google.protobuf.Empty
 }
 var file_proto_core_core_proto_depIdxs = []int32{
 	0,  // 0: core.Question.difficulty:type_name -> core.Difficulty
 	1,  // 1: core.Question.type:type_name -> core.QuestionType
-	3,  // 2: core.Question.tags:type_name -> core.Tag
-	16, // 3: core.Question.created_at:type_name -> google.protobuf.Timestamp
-	16, // 4: core.Question.updated_at:type_name -> google.protobuf.Timestamp
-	16, // 5: core.UserProgress.last_reviewed_at:type_name -> google.protobuf.Timestamp
-	16, // 6: core.UserProgress.next_review_at:type_name -> google.protobuf.Timestamp
-	1,  // 7: core.ListQuestionsRequest.type:type_name -> core.QuestionType
+	18, // 2: core.Question.created_at:type_name -> google.protobuf.Timestamp
+	18, // 3: core.Question.updated_at:type_name -> google.protobuf.Timestamp
+	18, // 4: core.UserProgress.last_reviewed_at:type_name -> google.protobuf.Timestamp
+	18, // 5: core.UserProgress.next_review_at:type_name -> google.protobuf.Timestamp
+	1,  // 6: core.ListQuestionsRequest.type:type_name -> core.QuestionType
+	0,  // 7: core.ListQuestionsRequest.difficulty:type_name -> core.Difficulty
 	4,  // 8: core.ListQuestionsResponse.questions:type_name -> core.Question
 	0,  // 9: core.CreateQuestionRequest.difficulty:type_name -> core.Difficulty
 	1,  // 10: core.CreateQuestionRequest.type:type_name -> core.QuestionType
-	3,  // 11: core.CreateQuestionRequest.tags:type_name -> core.Tag
-	1,  // 12: core.UpdateQuestionRequest.type:type_name -> core.QuestionType
-	0,  // 13: core.UpdateQuestionRequest.difficulty:type_name -> core.Difficulty
-	3,  // 14: core.UpdateQuestionRequest.tags:type_name -> core.Tag
-	3,  // 15: core.ListTagsResponse.tags:type_name -> core.Tag
-	2,  // 16: core.RecordAnswerRequest.answer_quality:type_name -> core.AnswerQuality
-	6,  // 17: core.CoreService.GetQuestion:input_type -> core.GetQuestionRequest
-	7,  // 18: core.CoreService.ListQuestions:input_type -> core.ListQuestionsRequest
-	9,  // 19: core.CoreService.CreateQuestion:input_type -> core.CreateQuestionRequest
-	10, // 20: core.CoreService.DeleteQuestion:input_type -> core.DeleteQuestionRequest
-	11, // 21: core.CoreService.UpdateQuestion:input_type -> core.UpdateQuestionRequest
-	17, // 22: core.CoreService.ListTags:input_type -> google.protobuf.Empty
-	13, // 23: core.CoreService.GetNextQuestion:input_type -> core.GetNextQuestionRequest
-	14, // 24: core.CoreService.GetUserProgress:input_type -> core.GetUserProgressRequest
-	15, // 25: core.CoreService.RecordAnswer:input_type -> core.RecordAnswerRequest
+	1,  // 11: core.UpdateQuestionRequest.type:type_name -> core.QuestionType
+	0,  // 12: core.UpdateQuestionRequest.difficulty:type_name -> core.Difficulty
+	3,  // 13: core.ListTagsResponse.tags:type_name -> core.Tag
+	2,  // 14: core.RecordAnswerRequest.answer_quality:type_name -> core.AnswerQuality
+	6,  // 15: core.CoreService.GetQuestion:input_type -> core.GetQuestionRequest
+	7,  // 16: core.CoreService.ListQuestions:input_type -> core.ListQuestionsRequest
+	9,  // 17: core.CoreService.CreateQuestion:input_type -> core.CreateQuestionRequest
+	10, // 18: core.CoreService.DeleteQuestion:input_type -> core.DeleteQuestionRequest
+	11, // 19: core.CoreService.UpdateQuestion:input_type -> core.UpdateQuestionRequest
+	12, // 20: core.CoreService.CreateTag:input_type -> core.CreateTagRequest
+	13, // 21: core.CoreService.DeleteTag:input_type -> core.DeleteTagRequest
+	19, // 22: core.CoreService.ListTags:input_type -> google.protobuf.Empty
+	15, // 23: core.CoreService.GetNextQuestion:input_type -> core.GetNextQuestionRequest
+	16, // 24: core.CoreService.GetUserProgress:input_type -> core.GetUserProgressRequest
+	17, // 25: core.CoreService.RecordAnswer:input_type -> core.RecordAnswerRequest
 	4,  // 26: core.CoreService.GetQuestion:output_type -> core.Question
 	8,  // 27: core.CoreService.ListQuestions:output_type -> core.ListQuestionsResponse
 	4,  // 28: core.CoreService.CreateQuestion:output_type -> core.Question
-	17, // 29: core.CoreService.DeleteQuestion:output_type -> google.protobuf.Empty
+	19, // 29: core.CoreService.DeleteQuestion:output_type -> google.protobuf.Empty
 	4,  // 30: core.CoreService.UpdateQuestion:output_type -> core.Question
-	12, // 31: core.CoreService.ListTags:output_type -> core.ListTagsResponse
-	4,  // 32: core.CoreService.GetNextQuestion:output_type -> core.Question
-	5,  // 33: core.CoreService.GetUserProgress:output_type -> core.UserProgress
-	5,  // 34: core.CoreService.RecordAnswer:output_type -> core.UserProgress
-	26, // [26:35] is the sub-list for method output_type
-	17, // [17:26] is the sub-list for method input_type
-	17, // [17:17] is the sub-list for extension type_name
-	17, // [17:17] is the sub-list for extension extendee
-	0,  // [0:17] is the sub-list for field type_name
+	3,  // 31: core.CoreService.CreateTag:output_type -> core.Tag
+	19, // 32: core.CoreService.DeleteTag:output_type -> google.protobuf.Empty
+	14, // 33: core.CoreService.ListTags:output_type -> core.ListTagsResponse
+	4,  // 34: core.CoreService.GetNextQuestion:output_type -> core.Question
+	5,  // 35: core.CoreService.GetUserProgress:output_type -> core.UserProgress
+	5,  // 36: core.CoreService.RecordAnswer:output_type -> core.UserProgress
+	26, // [26:37] is the sub-list for method output_type
+	15, // [15:26] is the sub-list for method input_type
+	15, // [15:15] is the sub-list for extension type_name
+	15, // [15:15] is the sub-list for extension extendee
+	0,  // [0:15] is the sub-list for field type_name
 }
 
 func init() { file_proto_core_core_proto_init() }
@@ -1220,6 +1335,7 @@ func file_proto_core_core_proto_init() {
 		return
 	}
 	file_proto_core_core_proto_msgTypes[1].OneofWrappers = []any{}
+	file_proto_core_core_proto_msgTypes[4].OneofWrappers = []any{}
 	file_proto_core_core_proto_msgTypes[6].OneofWrappers = []any{}
 	file_proto_core_core_proto_msgTypes[8].OneofWrappers = []any{}
 	type x struct{}
@@ -1228,7 +1344,7 @@ func file_proto_core_core_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_core_core_proto_rawDesc), len(file_proto_core_core_proto_rawDesc)),
 			NumEnums:      3,
-			NumMessages:   13,
+			NumMessages:   15,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

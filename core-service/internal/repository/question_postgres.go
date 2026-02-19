@@ -108,7 +108,7 @@ func (q *postgresQuestionRepository) GetQuestionByID(ctx context.Context, id str
 	defer rows.Close()
 
 	for rows.Next() {
-		var tagID int
+		var tagID int32
 		err := rows.Scan(&tagID)
 		if err != nil {
 			return Question{}, err
@@ -120,6 +120,12 @@ func (q *postgresQuestionRepository) GetQuestionByID(ctx context.Context, id str
 }
 
 func (q *postgresQuestionRepository) UpdateQuestion(ctx context.Context, id string, params UpdateQuestionParams) (Question, error) {
+	tx, err := q.pool.Begin(ctx)
+	if err != nil {
+		return Question{}, err
+	}
+	defer tx.Rollback(ctx)
+
 	var setClauses []string
 	var args []any
 	argIndex := 1
@@ -154,7 +160,7 @@ func (q *postgresQuestionRepository) UpdateQuestion(ctx context.Context, id stri
 		argIndex++
 	}
 
-	if len(setClauses) == 0 {
+	if len(setClauses) == 0 && params.TagIDs == nil {
 		return q.GetQuestionByID(ctx, id)
 	}
 
@@ -168,7 +174,7 @@ func (q *postgresQuestionRepository) UpdateQuestion(ctx context.Context, id stri
 
 	args = append(args, id)
 	var question Question
-	err := q.pool.QueryRow(ctx, query, args...).Scan(
+	err = tx.QueryRow(ctx, query, args...).Scan(
 		&question.ID,
 		&question.Type,
 		&question.Title,
@@ -182,6 +188,58 @@ func (q *postgresQuestionRepository) UpdateQuestion(ctx context.Context, id stri
 		return Question{}, err
 	}
 
+	if params.TagIDs != nil {
+
+		_, err = tx.Exec(ctx, "DELETE FROM question_tags WHERE question_id = $1", id)
+		if err != nil {
+			return Question{}, err
+		}
+
+		if len(params.TagIDs) > 0 {
+			placeholders := make([]string, 0, len(params.TagIDs))
+			args := make([]any, 0, len(params.TagIDs)+1)
+			args = append(args, id)
+			for i, tagID := range params.TagIDs {
+				placeholders = append(placeholders, fmt.Sprintf("($1, $%d)", i+2))
+				args = append(args, tagID)
+			}
+
+			insertTagsQuery := fmt.Sprintf(
+				"INSERT INTO question_tags (question_id, tag_id) VALUES %s",
+				strings.Join(placeholders, ", "),
+			)
+			_, err = tx.Exec(ctx, insertTagsQuery, args...)
+			if err != nil {
+				return Question{}, err
+			}
+			question.TagIDs = params.TagIDs
+		}
+
+	} else {
+		tagsQuery := "SELECT tag_id FROM question_tags WHERE question_id = $1 ORDER BY tag_id"
+
+		rows, err := tx.Query(ctx, tagsQuery, id)
+		if err != nil {
+			return Question{}, err
+		}
+		defer rows.Close()
+
+		for rows.Next() {
+			var tagID int32
+			err := rows.Scan(&tagID)
+			if err != nil {
+				return Question{}, err
+			}
+			question.TagIDs = append(question.TagIDs, tagID)
+		}
+
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		return Question{}, err
+	}
+
 	return question, nil
 }
 
@@ -191,38 +249,42 @@ func (q *postgresQuestionRepository) DeleteQuestion(ctx context.Context, id stri
 	return err
 }
 
-func (q *postgresQuestionRepository) ListQuestions(ctx context.Context, filters ListQuestionsFilters) ([]Question, error) {
+func (q *postgresQuestionRepository) ListQuestions(ctx context.Context, filters ListQuestionsFilters) (ListQuestionsResult, error) {
 	query := `
 	SELECT id, type, title, content_md, answer_md, difficulty, created_at, updated_at
 	FROM questions
 	`
 
 	var conditions []string
-	var args []any
+	var filterArgs []any
 	argIndex := 1
+	whereClause := ""
 
 	if filters.Type != nil {
 		conditions = append(conditions, fmt.Sprintf("type = $%d", argIndex))
-		args = append(args, *filters.Type)
+		filterArgs = append(filterArgs, *filters.Type)
 		argIndex++
 	}
 
 	if filters.Difficulty != nil {
 		conditions = append(conditions, fmt.Sprintf("difficulty = $%d", argIndex))
-		args = append(args, *filters.Difficulty)
+		filterArgs = append(filterArgs, *filters.Difficulty)
 		argIndex++
 	}
 
 	if len(conditions) > 0 {
-		query += " WHERE " + strings.Join(conditions, " AND ")
+		whereClause = " WHERE " + strings.Join(conditions, " AND ")
 	}
 
+	query += whereClause
 	query += fmt.Sprintf(" LIMIT $%d OFFSET $%d", argIndex, argIndex+1)
+	args := make([]any, len(filterArgs))
+	copy(args, filterArgs)
 	args = append(args, filters.Limit, filters.Offset)
 
 	questionRows, err := q.pool.Query(ctx, query, args...)
 	if err != nil {
-		return nil, err
+		return ListQuestionsResult{}, err
 	}
 	defer questionRows.Close()
 
@@ -240,17 +302,22 @@ func (q *postgresQuestionRepository) ListQuestions(ctx context.Context, filters 
 			&question.UpdatedAt,
 		)
 		if err != nil {
-			return nil, err
+			return ListQuestionsResult{}, err
 		}
 
 		questions = append(questions, question)
 	}
 
 	if err := questionRows.Err(); err != nil {
-		return nil, err
+		return ListQuestionsResult{}, err
+	}
+	var totalCount int32
+	err = q.pool.QueryRow(ctx, "SELECT COUNT(*) FROM questions"+whereClause, filterArgs...).Scan(&totalCount)
+	if err != nil {
+		return ListQuestionsResult{}, err
 	}
 
-	return questions, nil
+	return ListQuestionsResult{Questions: questions, TotalCount: totalCount}, nil
 }
 
 func (q *postgresQuestionRepository) GetNewQuestionID(ctx context.Context, userID string) (string, error) {

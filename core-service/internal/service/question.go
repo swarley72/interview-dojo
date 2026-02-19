@@ -17,7 +17,7 @@ type QuestionService interface {
 	GetQuestionByID(ctx context.Context, id string) (repository.Question, error)
 	UpdateQuestion(ctx context.Context, id string, params repository.UpdateQuestionParams) (repository.Question, error)
 	DeleteQuestion(ctx context.Context, id string) error
-	ListQuestions(ctx context.Context, filters repository.ListQuestionsFilters) ([]repository.Question, error)
+	ListQuestions(ctx context.Context, filters repository.ListQuestionsFilters) (repository.ListQuestionsResult, error)
 }
 
 type questionService struct {
@@ -56,7 +56,7 @@ func (q *questionService) GetQuestionByID(ctx context.Context, id string) (repos
 	return question, nil
 }
 
-func (q *questionService) ListQuestions(ctx context.Context, filters repository.ListQuestionsFilters) ([]repository.Question, error) {
+func (q *questionService) ListQuestions(ctx context.Context, filters repository.ListQuestionsFilters) (repository.ListQuestionsResult, error) {
 	return q.questionRepo.ListQuestions(ctx, filters)
 }
 
