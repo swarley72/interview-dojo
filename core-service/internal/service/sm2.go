@@ -3,12 +3,12 @@ package service
 import "math"
 
 type sm2Result struct {
-	Repetitions  int
+	Repetitions  int32
 	EaseFactor   float64
-	IntervalDays int
+	IntervalDays int32
 }
 
-func calculateSM2(repetitions int, easeFactor float64, intervalDays int, quality int) sm2Result {
+func calculateSM2(repetitions int32, easeFactor float64, intervalDays int32, quality int) sm2Result {
 	if easeFactor == 0 {
 		easeFactor = 2.5
 	}
@@ -26,14 +26,14 @@ func calculateSM2(repetitions int, easeFactor float64, intervalDays int, quality
 
 	newReps := repetitions + 1
 
-	var newInterval int
+	var newInterval int32
 	switch newReps {
 	case 1:
 		newInterval = 1
 	case 2:
 		newInterval = 6
 	default:
-		newInterval = int(math.Round(float64(intervalDays) * newEF))
+		newInterval = int32(math.Round(float64(intervalDays) * newEF))
 	}
 
 	return sm2Result{

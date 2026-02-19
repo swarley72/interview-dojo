@@ -91,3 +91,31 @@ func questionToProto(q *repository.Question) (*corepb.Question, error) {
 		UpdatedAt:  timestamppb.New(q.UpdatedAt),
 	}, nil
 }
+
+var answerQualityFromProtoMap = map[corepb.AnswerQuality]int{
+	corepb.AnswerQuality_ANSWER_QUALITY_AGAIN: 0,
+	corepb.AnswerQuality_ANSWER_QUALITY_HARD:  3,
+	corepb.AnswerQuality_ANSWER_QUALITY_GOOD:  4,
+	corepb.AnswerQuality_ANSWER_QUALITY_EASY:  5,
+}
+
+func answerQualityFromProto(a corepb.AnswerQuality) (int, error) {
+	q, ok := answerQualityFromProtoMap[a]
+	if !ok {
+		return 0, ErrUnknownEnumValue
+	}
+	return q, nil
+}
+
+func progressToProto(p *repository.UserProgress) *corepb.UserProgress {
+	return &corepb.UserProgress{
+		Id:             p.ID,
+		UserId:         p.UserID,
+		QuestionId:     p.QuestionID,
+		Repetitions:    p.Repetitions,
+		EaseFactor:     float32(p.EaseFactor),
+		IntervalDays:   p.IntervalDays,
+		LastReviewedAt: timestamppb.New(p.LastReviewedAt),
+		NextReviewAt:   timestamppb.New(p.NextReviewAt),
+	}
+}

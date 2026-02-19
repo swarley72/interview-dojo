@@ -14,9 +14,9 @@ type UserProgressRepository interface {
 type UserProgress struct {
 	UserID         string
 	QuestionID     string
-	ID             int
-	Repetitions    int
-	IntervalDays   int
+	ID             int32
+	Repetitions    int32
+	IntervalDays   int32
 	EaseFactor     float64
 	LastReviewedAt time.Time
 	NextReviewAt   time.Time
@@ -25,8 +25,8 @@ type UserProgress struct {
 type UpsertProgressParams struct {
 	UserID       string
 	QuestionID   string
-	Repetitions  int
-	IntervalDays int
+	Repetitions  int32
+	IntervalDays int32
 	EaseFactor   float64
 	NextReviewAt time.Time
 }

@@ -34,6 +34,8 @@ func mapError(err error) error {
 		return status.Error(codes.NotFound, "question not found")
 	case errors.Is(err, ErrUnknownEnumValue):
 		return status.Error(codes.Internal, "unknown enum value")
+	case errors.Is(err, service.ErrProgressNotFound):
+		return status.Error(codes.Internal, "user progress not found")
 	default:
 		return status.Error(codes.Internal, "internal error")
 	}

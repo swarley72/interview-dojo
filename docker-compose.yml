@@ -47,3 +47,17 @@ services:
       - "8080:8080"
     depends_on:
       - user-service
+
+  core-service:
+    build:
+      context: .
+      dockerfile: core-service/Dockerfile
+    container_name: interview-dojo-core-service
+    environment:
+      DATABASE_URL: postgres://kim:kim@postgres:5432/core_service?sslmode=disable
+      GRPC_PORT: 50052
+    ports:
+      - "50052:50052"
+    depends_on:
+      postgres:
+        condition: service_healthy

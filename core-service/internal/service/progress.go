@@ -62,7 +62,7 @@ func (s *userProgressService) RecordAnswer(ctx context.Context, userID string, q
 		Repetitions:  result.Repetitions,
 		EaseFactor:   result.EaseFactor,
 		IntervalDays: result.IntervalDays,
-		NextReviewAt: time.Now().AddDate(0, 0, result.IntervalDays),
+		NextReviewAt: time.Now().AddDate(0, 0, int(result.IntervalDays)),
 	})
 }
 
