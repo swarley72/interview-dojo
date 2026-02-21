@@ -14,11 +14,7 @@ type getProfileResponse struct {
 }
 
 func (h *Handler) GetProfile(w http.ResponseWriter, req *http.Request) {
-	userID, ok := req.Context().Value(middleware.UserIDKey).(string)
-	if !ok {
-		writeError(w, http.StatusInternalServerError, "internal server error")
-		return
-	}
+	userID := middleware.UserIDFromAuthClaims(req.Context())
 
 	response, err := h.userService.GetUser(req.Context(), &userpb.GetUserRequest{UserId: userID})
 	if err != nil {
