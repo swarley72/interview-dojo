@@ -1,4 +1,4 @@
-.PHONY: proto proto-install clean up down build image-prune
+.PHONY: proto proto-install clean up up-backend down build image-prune migrate superuser
 
 proto:
 	protoc --proto_path=. --proto_path=proto \
@@ -16,6 +16,17 @@ proto-install:
 
 up:
 	docker compose up --build -d
+
+up-backend:
+	docker compose up --build -d postgres user-service core-service api-gateway
+
+migrate:
+	migrate -path user-service/migrations -database "postgres://kim:kim@localhost:5432/user_service?sslmode=disable" up
+	migrate -path core-service/migrations -database "postgres://kim:kim@localhost:5432/core_service?sslmode=disable" up
+
+superuser:
+	DATABASE_URL="postgres://kim:kim@localhost:5432/user_service?sslmode=disable" \
+		go run ./user-service/cmd/createsuperuser -login $(login) -password $(password)
 
 down:
 	docker compose down
