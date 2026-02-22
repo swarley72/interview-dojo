@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/swarley72/interview-dojo/api-gateway/internal/middleware"
@@ -23,7 +24,31 @@ type UserProgressResponse struct {
 
 func (h *Handler) GetNextQuestion(w http.ResponseWriter, req *http.Request) {
 	userID := middleware.UserIDFromAuthClaims(req.Context())
-	question, err := h.coreService.GetNextQuestion(req.Context(), &corepb.GetNextQuestionRequest{UserId: userID})
+	q := req.URL.Query()
+	grpcReq := &corepb.GetNextQuestionRequest{UserId: userID}
+
+	if t := q.Get("type"); t != "" {
+		qt, err := questionTypeToProto(t)
+		if err != nil {
+			writeError(w, http.StatusBadRequest, "invalid question type")
+			return
+		}
+		grpcReq.Type = &qt
+	}
+
+	tagStrs := q["tag_id"]
+	var tagIDs []int32
+	for _, s := range tagStrs {
+		id, err := strconv.Atoi(s)
+		if err != nil {
+			writeError(w, http.StatusBadRequest, "invalid tag_id query")
+			return
+		}
+		tagIDs = append(tagIDs, int32(id))
+	}
+	grpcReq.TagIds = tagIDs
+
+	question, err := h.coreService.GetNextQuestion(req.Context(), grpcReq)
 	if err != nil {
 		handleGRPCError(w, err, "get next question failed")
 		return

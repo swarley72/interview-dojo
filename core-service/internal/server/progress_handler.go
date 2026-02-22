@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 
+	"github.com/swarley72/interview-dojo/core-service/internal/repository"
 	corepb "github.com/swarley72/interview-dojo/proto/core"
 )
 
@@ -30,7 +31,19 @@ func (g *GRPCServer) RecordAnswer(ctx context.Context, req *corepb.RecordAnswerR
 }
 
 func (g *GRPCServer) GetNextQuestion(ctx context.Context, req *corepb.GetNextQuestionRequest) (*corepb.Question, error) {
-	question, err := g.progressService.GetNextQuestion(ctx, req.UserId)
+	var questionType *string
+	if req.Type != nil {
+		t, err := questionTypeFromProto(*req.Type)
+		if err != nil {
+			return nil, mapError(err)
+		}
+		questionType = &t
+	}
+
+	question, err := g.progressService.GetNextQuestion(ctx, req.UserId, repository.NextQuestionFilters{
+		QuestionType: questionType,
+		TagIDs:       req.TagIds,
+	})
 	if err != nil {
 		return nil, mapError(err)
 	}

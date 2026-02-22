@@ -111,6 +111,8 @@ message ListTagsResponse {
 
 message GetNextQuestionRequest {
     string user_id = 1;
+    optional QuestionType type = 2;
+    repeated int32 tag_ids = 3;
 }
 
 message GetUserProgressRequest {

@@ -25,7 +25,7 @@ var validAnswerQualities = map[int]bool{
 type UserProgressService interface {
 	GetProgress(ctx context.Context, userID string, questionID string) (repository.UserProgress, error)
 	RecordAnswer(ctx context.Context, userID string, questionID string, answerQuality int) (repository.UserProgress, error)
-	GetNextQuestion(ctx context.Context, userID string) (repository.Question, error)
+	GetNextQuestion(ctx context.Context, userID string, filters repository.NextQuestionFilters) (repository.Question, error)
 }
 
 type userProgressService struct {
@@ -66,14 +66,14 @@ func (s *userProgressService) RecordAnswer(ctx context.Context, userID string, q
 	})
 }
 
-func (s *userProgressService) GetNextQuestion(ctx context.Context, userID string) (repository.Question, error) {
-	questionID, err := s.userProgressRepo.GetDueQuestionID(ctx, userID)
+func (s *userProgressService) GetNextQuestion(ctx context.Context, userID string, filters repository.NextQuestionFilters) (repository.Question, error) {
+	questionID, err := s.userProgressRepo.GetDueQuestionID(ctx, userID, filters)
 	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 		return repository.Question{}, err
 	}
 
 	if errors.Is(err, pgx.ErrNoRows) {
-		questionID, err = s.questionRepo.GetNewQuestionID(ctx, userID)
+		questionID, err = s.questionRepo.GetNewQuestionID(ctx, userID, filters)
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
 				return repository.Question{}, ErrNoQuestionsAvailable

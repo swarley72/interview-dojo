@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -73,15 +74,27 @@ func (up *postgresUserProgressRepository) UpsertProgress(ctx context.Context, pa
 	return progress, nil
 }
 
-func (up *postgresUserProgressRepository) GetDueQuestionID(ctx context.Context, userID string) (string, error) {
+func (up *postgresUserProgressRepository) GetDueQuestionID(ctx context.Context, userID string, filters NextQuestionFilters) (string, error) {
 	query := `
-	SELECT question_id FROM user_progress
-	WHERE user_id = $1 AND next_review_at <= now()
-	ORDER BY next_review_at ASC
-	LIMIT 1
+	SELECT question_id FROM user_progress up
+	JOIN questions q ON q.id = up.question_id
+	WHERE up.user_id = $1 AND up.next_review_at <= now()
 	`
+	args := []any{userID}
+
+	if filters.QuestionType != nil {
+		args = append(args, *filters.QuestionType)
+		query += fmt.Sprintf(" AND q.type = $%d", len(args))
+	}
+
+	if len(filters.TagIDs) > 0 {
+		args = append(args, filters.TagIDs)
+		query += fmt.Sprintf(" AND q.id IN (SELECT DISTINCT question_id FROM question_tags WHERE tag_id = ANY($%d))", len(args))
+	}
+	query += " ORDER BY next_review_at ASC LIMIT 1"
+
 	var questionID string
-	err := up.pool.QueryRow(ctx, query, userID).Scan(&questionID)
+	err := up.pool.QueryRow(ctx, query, args...).Scan(&questionID)
 	if err != nil {
 		return "", err
 	}

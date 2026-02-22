@@ -241,10 +241,7 @@ func (q *postgresQuestionRepository) DeleteQuestion(ctx context.Context, id stri
 }
 
 func (q *postgresQuestionRepository) ListQuestions(ctx context.Context, filters ListQuestionsFilters) (ListQuestionsResult, error) {
-	query := `
-	SELECT id, type, title, content_md, answer_md, difficulty, created_at, updated_at
-	FROM questions
-	`
+	query := "SELECT id, type, title, difficulty, created_at, updated_at FROM questions"
 
 	var conditions []string
 	var filterArgs []any
@@ -293,8 +290,6 @@ func (q *postgresQuestionRepository) ListQuestions(ctx context.Context, filters 
 			&question.ID,
 			&question.Type,
 			&question.Title,
-			&question.ContentMD,
-			&question.AnswerMD,
 			&question.Difficulty,
 			&question.CreatedAt,
 			&question.UpdatedAt,
@@ -331,14 +326,26 @@ func (q *postgresQuestionRepository) ListQuestions(ctx context.Context, filters 
 	return ListQuestionsResult{Questions: questions, TotalCount: totalCount}, nil
 }
 
-func (q *postgresQuestionRepository) GetNewQuestionID(ctx context.Context, userID string) (string, error) {
+func (q *postgresQuestionRepository) GetNewQuestionID(ctx context.Context, userID string, filters NextQuestionFilters) (string, error) {
 	query := `
-	SELECT id FROM questions
-	WHERE id NOT IN (SELECT question_id FROM user_progress WHERE user_id = $1)
-	LIMIT 1
+	SELECT id FROM questions q
+	WHERE q.id NOT IN (SELECT question_id FROM user_progress WHERE user_id = $1)
 	`
+	args := []any{userID}
+	if filters.QuestionType != nil {
+		args = append(args, *filters.QuestionType)
+		query += fmt.Sprintf(" AND q.type = $%d", len(args))
+	}
+
+	if len(filters.TagIDs) > 0 {
+		args = append(args, filters.TagIDs)
+		query += fmt.Sprintf(" AND q.id IN (SELECT DISTINCT question_id FROM question_tags WHERE tag_id = ANY($%d))", len(args))
+	}
+
+	query += " LIMIT 1"
+
 	var questionID string
-	err := q.pool.QueryRow(ctx, query, userID).Scan(&questionID)
+	err := q.pool.QueryRow(ctx, query, args...).Scan(&questionID)
 	if err != nil {
 		return "", err
 	}

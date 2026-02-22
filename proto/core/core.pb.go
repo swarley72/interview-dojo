@@ -969,6 +969,8 @@ func (x *ListTagsResponse) GetTags() []*Tag {
 type GetNextQuestionRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Type          *QuestionType          `protobuf:"varint,2,opt,name=type,proto3,enum=core.QuestionType,oneof" json:"type,omitempty"`
+	TagIds        []int32                `protobuf:"varint,3,rep,packed,name=tag_ids,json=tagIds,proto3" json:"tag_ids,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1008,6 +1010,20 @@ func (x *GetNextQuestionRequest) GetUserId() string {
 		return x.UserId
 	}
 	return ""
+}
+
+func (x *GetNextQuestionRequest) GetType() QuestionType {
+	if x != nil && x.Type != nil {
+		return *x.Type
+	}
+	return QuestionType_QUESTION_TYPE_UNSPECIFIED
+}
+
+func (x *GetNextQuestionRequest) GetTagIds() []int32 {
+	if x != nil {
+		return x.TagIds
+	}
+	return nil
 }
 
 type GetUserProgressRequest struct {
@@ -1215,9 +1231,12 @@ const file_proto_core_core_proto_rawDesc = "" +
 	"\x10DeleteTagRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\"1\n" +
 	"\x10ListTagsResponse\x12\x1d\n" +
-	"\x04tags\x18\x01 \x03(\v2\t.core.TagR\x04tags\"1\n" +
+	"\x04tags\x18\x01 \x03(\v2\t.core.TagR\x04tags\"\x80\x01\n" +
 	"\x16GetNextQuestionRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\"R\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12+\n" +
+	"\x04type\x18\x02 \x01(\x0e2\x12.core.QuestionTypeH\x00R\x04type\x88\x01\x01\x12\x17\n" +
+	"\atag_ids\x18\x03 \x03(\x05R\x06tagIdsB\a\n" +
+	"\x05_type\"R\n" +
 	"\x16GetUserProgressRequest\x12\x1f\n" +
 	"\vquestion_id\x18\x01 \x01(\tR\n" +
 	"questionId\x12\x17\n" +
@@ -1308,34 +1327,35 @@ var file_proto_core_core_proto_depIdxs = []int32{
 	1,  // 11: core.UpdateQuestionRequest.type:type_name -> core.QuestionType
 	0,  // 12: core.UpdateQuestionRequest.difficulty:type_name -> core.Difficulty
 	3,  // 13: core.ListTagsResponse.tags:type_name -> core.Tag
-	2,  // 14: core.RecordAnswerRequest.answer_quality:type_name -> core.AnswerQuality
-	6,  // 15: core.CoreService.GetQuestion:input_type -> core.GetQuestionRequest
-	7,  // 16: core.CoreService.ListQuestions:input_type -> core.ListQuestionsRequest
-	9,  // 17: core.CoreService.CreateQuestion:input_type -> core.CreateQuestionRequest
-	10, // 18: core.CoreService.DeleteQuestion:input_type -> core.DeleteQuestionRequest
-	11, // 19: core.CoreService.UpdateQuestion:input_type -> core.UpdateQuestionRequest
-	12, // 20: core.CoreService.CreateTag:input_type -> core.CreateTagRequest
-	13, // 21: core.CoreService.DeleteTag:input_type -> core.DeleteTagRequest
-	19, // 22: core.CoreService.ListTags:input_type -> google.protobuf.Empty
-	15, // 23: core.CoreService.GetNextQuestion:input_type -> core.GetNextQuestionRequest
-	16, // 24: core.CoreService.GetUserProgress:input_type -> core.GetUserProgressRequest
-	17, // 25: core.CoreService.RecordAnswer:input_type -> core.RecordAnswerRequest
-	4,  // 26: core.CoreService.GetQuestion:output_type -> core.Question
-	8,  // 27: core.CoreService.ListQuestions:output_type -> core.ListQuestionsResponse
-	4,  // 28: core.CoreService.CreateQuestion:output_type -> core.Question
-	19, // 29: core.CoreService.DeleteQuestion:output_type -> google.protobuf.Empty
-	4,  // 30: core.CoreService.UpdateQuestion:output_type -> core.Question
-	3,  // 31: core.CoreService.CreateTag:output_type -> core.Tag
-	19, // 32: core.CoreService.DeleteTag:output_type -> google.protobuf.Empty
-	14, // 33: core.CoreService.ListTags:output_type -> core.ListTagsResponse
-	4,  // 34: core.CoreService.GetNextQuestion:output_type -> core.Question
-	5,  // 35: core.CoreService.GetUserProgress:output_type -> core.UserProgress
-	5,  // 36: core.CoreService.RecordAnswer:output_type -> core.UserProgress
-	26, // [26:37] is the sub-list for method output_type
-	15, // [15:26] is the sub-list for method input_type
-	15, // [15:15] is the sub-list for extension type_name
-	15, // [15:15] is the sub-list for extension extendee
-	0,  // [0:15] is the sub-list for field type_name
+	1,  // 14: core.GetNextQuestionRequest.type:type_name -> core.QuestionType
+	2,  // 15: core.RecordAnswerRequest.answer_quality:type_name -> core.AnswerQuality
+	6,  // 16: core.CoreService.GetQuestion:input_type -> core.GetQuestionRequest
+	7,  // 17: core.CoreService.ListQuestions:input_type -> core.ListQuestionsRequest
+	9,  // 18: core.CoreService.CreateQuestion:input_type -> core.CreateQuestionRequest
+	10, // 19: core.CoreService.DeleteQuestion:input_type -> core.DeleteQuestionRequest
+	11, // 20: core.CoreService.UpdateQuestion:input_type -> core.UpdateQuestionRequest
+	12, // 21: core.CoreService.CreateTag:input_type -> core.CreateTagRequest
+	13, // 22: core.CoreService.DeleteTag:input_type -> core.DeleteTagRequest
+	19, // 23: core.CoreService.ListTags:input_type -> google.protobuf.Empty
+	15, // 24: core.CoreService.GetNextQuestion:input_type -> core.GetNextQuestionRequest
+	16, // 25: core.CoreService.GetUserProgress:input_type -> core.GetUserProgressRequest
+	17, // 26: core.CoreService.RecordAnswer:input_type -> core.RecordAnswerRequest
+	4,  // 27: core.CoreService.GetQuestion:output_type -> core.Question
+	8,  // 28: core.CoreService.ListQuestions:output_type -> core.ListQuestionsResponse
+	4,  // 29: core.CoreService.CreateQuestion:output_type -> core.Question
+	19, // 30: core.CoreService.DeleteQuestion:output_type -> google.protobuf.Empty
+	4,  // 31: core.CoreService.UpdateQuestion:output_type -> core.Question
+	3,  // 32: core.CoreService.CreateTag:output_type -> core.Tag
+	19, // 33: core.CoreService.DeleteTag:output_type -> google.protobuf.Empty
+	14, // 34: core.CoreService.ListTags:output_type -> core.ListTagsResponse
+	4,  // 35: core.CoreService.GetNextQuestion:output_type -> core.Question
+	5,  // 36: core.CoreService.GetUserProgress:output_type -> core.UserProgress
+	5,  // 37: core.CoreService.RecordAnswer:output_type -> core.UserProgress
+	27, // [27:38] is the sub-list for method output_type
+	16, // [16:27] is the sub-list for method input_type
+	16, // [16:16] is the sub-list for extension type_name
+	16, // [16:16] is the sub-list for extension extendee
+	0,  // [0:16] is the sub-list for field type_name
 }
 
 func init() { file_proto_core_core_proto_init() }
@@ -1347,6 +1367,7 @@ func file_proto_core_core_proto_init() {
 	file_proto_core_core_proto_msgTypes[4].OneofWrappers = []any{}
 	file_proto_core_core_proto_msgTypes[6].OneofWrappers = []any{}
 	file_proto_core_core_proto_msgTypes[8].OneofWrappers = []any{}
+	file_proto_core_core_proto_msgTypes[12].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

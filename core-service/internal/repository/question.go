@@ -11,7 +11,7 @@ type QuestionRepository interface {
 	UpdateQuestion(ctx context.Context, id string, question UpdateQuestionParams) (Question, error)
 	DeleteQuestion(ctx context.Context, id string) error
 	ListQuestions(ctx context.Context, filters ListQuestionsFilters) (ListQuestionsResult, error)
-	GetNewQuestionID(ctx context.Context, userID string) (string, error)
+	GetNewQuestionID(ctx context.Context, userID string, filters NextQuestionFilters) (string, error)
 }
 
 type Question struct {
@@ -55,4 +55,9 @@ type ListQuestionsFilters struct {
 type ListQuestionsResult struct {
 	Questions  []Question
 	TotalCount int32
+}
+
+type NextQuestionFilters struct {
+	TagIDs       []int32
+	QuestionType *string
 }

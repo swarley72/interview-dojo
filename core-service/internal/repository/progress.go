@@ -8,7 +8,7 @@ import (
 type UserProgressRepository interface {
 	GetProgress(ctx context.Context, userID string, questionID string) (UserProgress, error)
 	UpsertProgress(ctx context.Context, params UpsertProgressParams) (UserProgress, error)
-	GetDueQuestionID(ctx context.Context, userID string) (string, error)
+	GetDueQuestionID(ctx context.Context, userID string, filters NextQuestionFilters) (string, error)
 }
 
 type UserProgress struct {
