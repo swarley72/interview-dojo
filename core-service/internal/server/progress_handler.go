@@ -5,6 +5,7 @@ import (
 
 	"github.com/swarley72/interview-dojo/core-service/internal/repository"
 	corepb "github.com/swarley72/interview-dojo/proto/core"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 func (g *GRPCServer) GetUserProgress(ctx context.Context, req *corepb.GetUserProgressRequest) (*corepb.UserProgress, error) {
@@ -14,6 +15,15 @@ func (g *GRPCServer) GetUserProgress(ctx context.Context, req *corepb.GetUserPro
 	}
 
 	return progressToProto(&progress), nil
+}
+
+func (g *GRPCServer) ResetUserProgress(ctx context.Context, req *corepb.ResetUserProgressRequest) (*emptypb.Empty, error) {
+	err := g.progressService.ResetProgress(ctx, req.UserId)
+	if err != nil {
+		return nil, mapError(err)
+	}
+
+	return &emptypb.Empty{}, nil
 }
 
 func (g *GRPCServer) RecordAnswer(ctx context.Context, req *corepb.RecordAnswerRequest) (*corepb.UserProgress, error) {

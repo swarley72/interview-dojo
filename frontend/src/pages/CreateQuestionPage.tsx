@@ -4,6 +4,7 @@ import type { Difficulty, QuestionType } from '../types';
 import { questionsApi } from '../api/questions';
 import { useTagsStore } from '../stores/tags';
 import { MarkdownEditor } from '../components/MarkdownEditor';
+import { ExcalidrawEditor } from '../components/ExcalidrawEditor';
 import { TagSelector } from '../components/TagSelector';
 import { Plus, Save } from 'lucide-react';
 
@@ -17,6 +18,7 @@ export function CreateQuestionPage() {
   const [contentMd, setContentMd] = useState('');
   const [answerMd, setAnswerMd] = useState('');
   const [tagIds, setTagIds] = useState<number[]>([]);
+  const [excalidrawJson, setExcalidrawJson] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -36,6 +38,7 @@ export function CreateQuestionPage() {
         type,
         content_md: contentMd || undefined,
         answer_md: answerMd || undefined,
+        excalidraw_json: excalidrawJson || undefined,
         tag_ids: tagIds.length > 0 ? tagIds : undefined,
       });
       navigate(`/questions/${q.id}`);
@@ -107,6 +110,13 @@ export function CreateQuestionPage() {
           onChange={setAnswerMd}
           placeholder="Ответ (Markdown)"
         />
+
+        {type === 'system_design' && (
+          <div>
+            <label className="block text-sm font-medium text-text-secondary mb-2">Диаграмма</label>
+            <ExcalidrawEditor initialData={excalidrawJson || null} onChange={setExcalidrawJson} />
+          </div>
+        )}
 
         <button
           type="submit"

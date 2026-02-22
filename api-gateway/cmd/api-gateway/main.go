@@ -80,6 +80,7 @@ func main() {
 			r.Get("/questions/{id}", h.GetQuestion)
 			r.Get("/anki/next", h.GetNextQuestion)
 			r.Post("/anki/{question_id}/answer", h.RecordAnswer)
+			r.Delete("/anki/progress", h.ResetProgress)
 
 			// Admin
 			r.Group(func(r chi.Router) {

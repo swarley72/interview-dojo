@@ -44,6 +44,7 @@ message Question {
     repeated int32 tag_ids = 7;
     google.protobuf.Timestamp created_at = 8;
     google.protobuf.Timestamp updated_at = 9;
+    optional string excalidraw_json = 10;
 }
 
 message UserProgress {
@@ -81,6 +82,7 @@ message CreateQuestionRequest {
     Difficulty difficulty = 4;
     QuestionType type = 5;
     repeated int32 tag_ids = 6;
+    optional string excalidraw_json = 7;
 }
 
 message DeleteQuestionRequest {
@@ -95,6 +97,7 @@ message UpdateQuestionRequest {
     optional QuestionType type = 5;
     optional Difficulty difficulty = 6;
     repeated int32 tag_ids = 7;
+    optional string excalidraw_json = 8;
 }
 
 message CreateTagRequest {
@@ -126,6 +129,10 @@ message RecordAnswerRequest {
     AnswerQuality answer_quality = 3;
 }
 
+message ResetUserProgressRequest {
+    string user_id = 1;
+}
+
 service CoreService {
     rpc GetQuestion(GetQuestionRequest) returns (Question);
     rpc ListQuestions(ListQuestionsRequest) returns (ListQuestionsResponse);
@@ -139,5 +146,6 @@ service CoreService {
     // Learning
     rpc GetNextQuestion(GetNextQuestionRequest) returns (Question);
     rpc GetUserProgress(GetUserProgressRequest) returns (UserProgress);
+    rpc ResetUserProgress(ResetUserProgressRequest) returns (google.protobuf.Empty);
     rpc RecordAnswer(RecordAnswerRequest) returns (UserProgress);
 }

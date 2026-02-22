@@ -113,3 +113,15 @@ func (h *Handler) RecordAnswer(w http.ResponseWriter, req *http.Request) {
 		EaseFactor:   userProgress.EaseFactor,
 	})
 }
+
+func (h *Handler) ResetProgress(w http.ResponseWriter, req *http.Request) {
+	userID := middleware.UserIDFromAuthClaims(req.Context())
+
+	_, err := h.coreService.ResetUserProgress(req.Context(), &corepb.ResetUserProgressRequest{UserId: userID})
+	if err != nil {
+		handleGRPCError(w, err, "reset progress failed")
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}

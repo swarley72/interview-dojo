@@ -4,6 +4,7 @@ import { DifficultyBadge } from './DifficultyBadge';
 import { TypeBadge } from './TypeBadge';
 import { TagBadge } from './TagBadge';
 import { MarkdownView } from './MarkdownView';
+import { ExcalidrawEditor } from './ExcalidrawEditor';
 import { useTagsStore } from '../stores/tags';
 import { Eye, BarChart3, Repeat, Calendar, Gauge, Timer } from 'lucide-react';
 
@@ -35,7 +36,7 @@ export function QuestionView({ question, children }: Props) {
         </div>
       )}
 
-      {question.answer_md && (
+      {(question.answer_md || question.excalidraw_json) && (
         <div>
           {!showAnswer ? (
             <button
@@ -46,12 +47,15 @@ export function QuestionView({ question, children }: Props) {
               Показать ответ
             </button>
           ) : (
-            <div className="bg-surface-raised rounded-xl p-6 border border-border-default">
-              <h2 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
+            <div className="bg-surface-raised rounded-xl p-6 border border-border-default space-y-4">
+              <h2 className="text-lg font-semibold text-text-primary flex items-center gap-2">
                 <Eye className="w-5 h-5 text-accent" />
                 Ответ
               </h2>
-              <MarkdownView content={question.answer_md} />
+              {question.answer_md && <MarkdownView content={question.answer_md} />}
+              {question.excalidraw_json && (
+                <ExcalidrawEditor initialData={question.excalidraw_json} readOnly />
+              )}
             </div>
           )}
         </div>

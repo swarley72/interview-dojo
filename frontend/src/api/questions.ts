@@ -28,6 +28,7 @@ export const questionsApi = {
     title: string;
     content_md?: string;
     answer_md?: string;
+    excalidraw_json?: string;
     difficulty: Difficulty;
     type: QuestionType;
     tag_ids?: number[];
@@ -39,6 +40,7 @@ export const questionsApi = {
       title?: string;
       content_md?: string;
       answer_md?: string;
+      excalidraw_json?: string;
       difficulty?: Difficulty;
       type?: QuestionType;
       tag_ids?: number[];

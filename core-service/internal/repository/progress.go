@@ -7,6 +7,7 @@ import (
 
 type UserProgressRepository interface {
 	GetProgress(ctx context.Context, userID string, questionID string) (UserProgress, error)
+	ResetProgress(ctx context.Context, userID string) error
 	UpsertProgress(ctx context.Context, params UpsertProgressParams) (UserProgress, error)
 	GetDueQuestionID(ctx context.Context, userID string, filters NextQuestionFilters) (string, error)
 }

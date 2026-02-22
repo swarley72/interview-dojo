@@ -24,6 +24,7 @@ var validAnswerQualities = map[int]bool{
 
 type UserProgressService interface {
 	GetProgress(ctx context.Context, userID string, questionID string) (repository.UserProgress, error)
+	ResetProgress(ctx context.Context, userID string) error
 	RecordAnswer(ctx context.Context, userID string, questionID string, answerQuality int) (repository.UserProgress, error)
 	GetNextQuestion(ctx context.Context, userID string, filters repository.NextQuestionFilters) (repository.Question, error)
 }
@@ -42,6 +43,10 @@ func (s *userProgressService) GetProgress(ctx context.Context, userID string, qu
 		return repository.UserProgress{}, err
 	}
 	return userProgress, nil
+}
+
+func (s *userProgressService) ResetProgress(ctx context.Context, userID string) error {
+	return s.userProgressRepo.ResetProgress(ctx, userID)
 }
 
 func (s *userProgressService) RecordAnswer(ctx context.Context, userID string, questionID string, answerQuality int) (repository.UserProgress, error) {

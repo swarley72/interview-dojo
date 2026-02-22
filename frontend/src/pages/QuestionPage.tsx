@@ -6,6 +6,7 @@ import { useAuthStore } from '../stores/auth';
 import { useTagsStore } from '../stores/tags';
 import { QuestionView } from '../components/QuestionView';
 import { MarkdownEditor } from '../components/MarkdownEditor';
+import { ExcalidrawEditor } from '../components/ExcalidrawEditor';
 import { ConfirmModal } from '../components/ConfirmModal';
 import { TagSelector } from '../components/TagSelector';
 import { Pencil, Save, X, Loader2, Trash2 } from 'lucide-react';
@@ -26,6 +27,7 @@ export function QuestionPage() {
   const [editContent, setEditContent] = useState('');
   const [editAnswer, setEditAnswer] = useState('');
   const [editTagIds, setEditTagIds] = useState<number[]>([]);
+  const [editExcalidraw, setEditExcalidraw] = useState('');
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -38,9 +40,10 @@ export function QuestionPage() {
       editType !== question.type ||
       editContent !== (question.content_md ?? '') ||
       editAnswer !== (question.answer_md ?? '') ||
+      editExcalidraw !== (question.excalidraw_json ?? '') ||
       JSON.stringify(editTagIds) !== JSON.stringify(question.tag_ids ?? [])
     );
-  }, [editing, question, editTitle, editDifficulty, editType, editContent, editAnswer, editTagIds]);
+  }, [editing, question, editTitle, editDifficulty, editType, editContent, editAnswer, editExcalidraw, editTagIds]);
 
   const blocker = useBlocker(editing && isDirty);
 
@@ -74,6 +77,7 @@ export function QuestionPage() {
     setEditType(question.type);
     setEditContent(question.content_md ?? '');
     setEditAnswer(question.answer_md ?? '');
+    setEditExcalidraw(question.excalidraw_json ?? '');
     setEditTagIds(question.tag_ids ?? []);
     setEditing(true);
   };
@@ -98,6 +102,7 @@ export function QuestionPage() {
         type: editType,
         content_md: editContent,
         answer_md: editAnswer,
+        excalidraw_json: editExcalidraw || undefined,
         tag_ids: editTagIds,
       });
       setQuestion(updated);
@@ -183,6 +188,12 @@ export function QuestionPage() {
           onChange={setEditAnswer}
           placeholder="Ответ (Markdown)"
         />
+        {editType === 'system_design' && (
+          <div>
+            <label className="block text-sm font-medium text-text-secondary mb-2">Диаграмма</label>
+            <ExcalidrawEditor initialData={editExcalidraw || null} onChange={setEditExcalidraw} />
+          </div>
+        )}
         <div className="flex gap-3">
           <button
             onClick={saveEditing}

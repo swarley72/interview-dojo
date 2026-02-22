@@ -20,17 +20,18 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	CoreService_GetQuestion_FullMethodName     = "/core.CoreService/GetQuestion"
-	CoreService_ListQuestions_FullMethodName   = "/core.CoreService/ListQuestions"
-	CoreService_CreateQuestion_FullMethodName  = "/core.CoreService/CreateQuestion"
-	CoreService_DeleteQuestion_FullMethodName  = "/core.CoreService/DeleteQuestion"
-	CoreService_UpdateQuestion_FullMethodName  = "/core.CoreService/UpdateQuestion"
-	CoreService_CreateTag_FullMethodName       = "/core.CoreService/CreateTag"
-	CoreService_DeleteTag_FullMethodName       = "/core.CoreService/DeleteTag"
-	CoreService_ListTags_FullMethodName        = "/core.CoreService/ListTags"
-	CoreService_GetNextQuestion_FullMethodName = "/core.CoreService/GetNextQuestion"
-	CoreService_GetUserProgress_FullMethodName = "/core.CoreService/GetUserProgress"
-	CoreService_RecordAnswer_FullMethodName    = "/core.CoreService/RecordAnswer"
+	CoreService_GetQuestion_FullMethodName       = "/core.CoreService/GetQuestion"
+	CoreService_ListQuestions_FullMethodName     = "/core.CoreService/ListQuestions"
+	CoreService_CreateQuestion_FullMethodName    = "/core.CoreService/CreateQuestion"
+	CoreService_DeleteQuestion_FullMethodName    = "/core.CoreService/DeleteQuestion"
+	CoreService_UpdateQuestion_FullMethodName    = "/core.CoreService/UpdateQuestion"
+	CoreService_CreateTag_FullMethodName         = "/core.CoreService/CreateTag"
+	CoreService_DeleteTag_FullMethodName         = "/core.CoreService/DeleteTag"
+	CoreService_ListTags_FullMethodName          = "/core.CoreService/ListTags"
+	CoreService_GetNextQuestion_FullMethodName   = "/core.CoreService/GetNextQuestion"
+	CoreService_GetUserProgress_FullMethodName   = "/core.CoreService/GetUserProgress"
+	CoreService_ResetUserProgress_FullMethodName = "/core.CoreService/ResetUserProgress"
+	CoreService_RecordAnswer_FullMethodName      = "/core.CoreService/RecordAnswer"
 )
 
 // CoreServiceClient is the client API for CoreService service.
@@ -48,6 +49,7 @@ type CoreServiceClient interface {
 	// Learning
 	GetNextQuestion(ctx context.Context, in *GetNextQuestionRequest, opts ...grpc.CallOption) (*Question, error)
 	GetUserProgress(ctx context.Context, in *GetUserProgressRequest, opts ...grpc.CallOption) (*UserProgress, error)
+	ResetUserProgress(ctx context.Context, in *ResetUserProgressRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	RecordAnswer(ctx context.Context, in *RecordAnswerRequest, opts ...grpc.CallOption) (*UserProgress, error)
 }
 
@@ -159,6 +161,16 @@ func (c *coreServiceClient) GetUserProgress(ctx context.Context, in *GetUserProg
 	return out, nil
 }
 
+func (c *coreServiceClient) ResetUserProgress(ctx context.Context, in *ResetUserProgressRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, CoreService_ResetUserProgress_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *coreServiceClient) RecordAnswer(ctx context.Context, in *RecordAnswerRequest, opts ...grpc.CallOption) (*UserProgress, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(UserProgress)
@@ -184,6 +196,7 @@ type CoreServiceServer interface {
 	// Learning
 	GetNextQuestion(context.Context, *GetNextQuestionRequest) (*Question, error)
 	GetUserProgress(context.Context, *GetUserProgressRequest) (*UserProgress, error)
+	ResetUserProgress(context.Context, *ResetUserProgressRequest) (*emptypb.Empty, error)
 	RecordAnswer(context.Context, *RecordAnswerRequest) (*UserProgress, error)
 	mustEmbedUnimplementedCoreServiceServer()
 }
@@ -224,6 +237,9 @@ func (UnimplementedCoreServiceServer) GetNextQuestion(context.Context, *GetNextQ
 }
 func (UnimplementedCoreServiceServer) GetUserProgress(context.Context, *GetUserProgressRequest) (*UserProgress, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetUserProgress not implemented")
+}
+func (UnimplementedCoreServiceServer) ResetUserProgress(context.Context, *ResetUserProgressRequest) (*emptypb.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method ResetUserProgress not implemented")
 }
 func (UnimplementedCoreServiceServer) RecordAnswer(context.Context, *RecordAnswerRequest) (*UserProgress, error) {
 	return nil, status.Error(codes.Unimplemented, "method RecordAnswer not implemented")
@@ -429,6 +445,24 @@ func _CoreService_GetUserProgress_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CoreService_ResetUserProgress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ResetUserProgressRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CoreServiceServer).ResetUserProgress(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CoreService_ResetUserProgress_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CoreServiceServer).ResetUserProgress(ctx, req.(*ResetUserProgressRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _CoreService_RecordAnswer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RecordAnswerRequest)
 	if err := dec(in); err != nil {
@@ -493,6 +527,10 @@ var CoreService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUserProgress",
 			Handler:    _CoreService_GetUserProgress_Handler,
+		},
+		{
+			MethodName: "ResetUserProgress",
+			Handler:    _CoreService_ResetUserProgress_Handler,
 		},
 		{
 			MethodName: "RecordAnswer",

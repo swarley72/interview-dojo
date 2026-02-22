@@ -34,3 +34,4 @@ go.work.sum
 infra/postgres/pgdata
 SPEC.md
 CLAUDE.md
+.DS_Store

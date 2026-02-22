@@ -15,33 +15,36 @@ type QuestionRepository interface {
 }
 
 type Question struct {
-	ID         string
-	Type       string
-	Title      string
-	Difficulty string
-	TagIDs     []int32
-	ContentMD  *string
-	AnswerMD   *string
-	CreatedAt  time.Time
-	UpdatedAt  time.Time
+	ID             string
+	Type           string
+	Title          string
+	Difficulty     string
+	TagIDs         []int32
+	ContentMD      *string
+	AnswerMD       *string
+	ExcalidrawJSON *string
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
 }
 
 type CreateQuestionParams struct {
-	TagIDs     []int32
-	Type       string
-	Title      string
-	Difficulty string
-	ContentMD  *string
-	AnswerMD   *string
+	TagIDs         []int32
+	Type           string
+	Title          string
+	Difficulty     string
+	ContentMD      *string
+	AnswerMD       *string
+	ExcalidrawJSON *string
 }
 
 type UpdateQuestionParams struct {
-	Type       *string
-	Title      *string
-	Difficulty *string
-	ContentMD  *string
-	AnswerMD   *string
-	TagIDs     []int32
+	Type           *string
+	Title          *string
+	Difficulty     *string
+	ContentMD      *string
+	AnswerMD       *string
+	ExcalidrawJSON *string
+	TagIDs         []int32
 }
 
 type ListQuestionsFilters struct {

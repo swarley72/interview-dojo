@@ -23,6 +23,7 @@ export interface Question {
   title: string;
   content_md: string | null;
   answer_md: string | null;
+  excalidraw_json: string | null;
   difficulty: Difficulty;
   type: QuestionType;
   tag_ids: number[];

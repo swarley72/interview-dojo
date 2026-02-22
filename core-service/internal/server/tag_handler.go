@@ -22,7 +22,7 @@ func (g *GRPCServer) DeleteTag(ctx context.Context, req *corepb.DeleteTagRequest
 		return nil, mapError(err)
 	}
 
-	return nil, nil
+	return &emptypb.Empty{}, nil
 }
 
 func (g *GRPCServer) ListTags(ctx context.Context, _ *emptypb.Empty) (*corepb.ListTagsResponse, error) {

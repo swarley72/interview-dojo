@@ -21,9 +21,9 @@ func (q *postgresQuestionRepository) CreateQuestion(ctx context.Context, params 
 	defer tx.Rollback(ctx)
 
 	questionQuery := `
-		INSERT INTO questions (type, title, content_md, answer_md, difficulty)
-		VALUES ($1, $2, $3, $4, $5)
-		RETURNING id, type, title, content_md, answer_md, difficulty, created_at, updated_at
+		INSERT INTO questions (type, title, content_md, answer_md, difficulty, excalidraw_json)
+		VALUES ($1, $2, $3, $4, $5, $6)
+		RETURNING id, type, title, content_md, answer_md, difficulty, excalidraw_json, created_at, updated_at
 	`
 	questionTagsQuery := `INSERT INTO question_tags (question_id, tag_id) VALUES ($1, $2)`
 
@@ -37,6 +37,7 @@ func (q *postgresQuestionRepository) CreateQuestion(ctx context.Context, params 
 		params.ContentMD,
 		params.AnswerMD,
 		params.Difficulty,
+		params.ExcalidrawJSON,
 	).Scan(
 		&question.ID,
 		&question.Type,
@@ -44,6 +45,7 @@ func (q *postgresQuestionRepository) CreateQuestion(ctx context.Context, params 
 		&question.ContentMD,
 		&question.AnswerMD,
 		&question.Difficulty,
+		&question.ExcalidrawJSON,
 		&question.CreatedAt,
 		&question.UpdatedAt,
 	)
@@ -82,7 +84,7 @@ func (q *postgresQuestionRepository) CreateQuestion(ctx context.Context, params 
 func (q *postgresQuestionRepository) GetQuestionByID(ctx context.Context, id string) (Question, error) {
 	var question Question
 	questionQuery := `
-		SELECT id, type, title, content_md, answer_md, difficulty, created_at, updated_at
+		SELECT id, type, title, content_md, answer_md, difficulty, excalidraw_json, created_at, updated_at
 		FROM questions
 		WHERE id = $1
 	`
@@ -93,6 +95,7 @@ func (q *postgresQuestionRepository) GetQuestionByID(ctx context.Context, id str
 		&question.ContentMD,
 		&question.AnswerMD,
 		&question.Difficulty,
+		&question.ExcalidrawJSON,
 		&question.CreatedAt,
 		&question.UpdatedAt,
 	)
@@ -151,6 +154,12 @@ func (q *postgresQuestionRepository) UpdateQuestion(ctx context.Context, id stri
 		argIndex++
 	}
 
+	if params.ExcalidrawJSON != nil {
+		setClauses = append(setClauses, fmt.Sprintf("excalidraw_json = $%d", argIndex))
+		args = append(args, *params.ExcalidrawJSON)
+		argIndex++
+	}
+
 	if len(setClauses) == 0 && params.TagIDs == nil {
 		return q.GetQuestionByID(ctx, id)
 	}
@@ -158,7 +167,7 @@ func (q *postgresQuestionRepository) UpdateQuestion(ctx context.Context, id stri
 	setClauses = append(setClauses, "updated_at = now()")
 
 	query := fmt.Sprintf(
-		"UPDATE questions SET %s WHERE id = $%d RETURNING id, type, title, content_md, answer_md, difficulty, created_at, updated_at",
+		"UPDATE questions SET %s WHERE id = $%d RETURNING id, type, title, content_md, answer_md, difficulty, excalidraw_json, created_at, updated_at",
 		strings.Join(setClauses, ", "),
 		argIndex,
 	)
@@ -172,6 +181,7 @@ func (q *postgresQuestionRepository) UpdateQuestion(ctx context.Context, id stri
 		&question.ContentMD,
 		&question.AnswerMD,
 		&question.Difficulty,
+		&question.ExcalidrawJSON,
 		&question.CreatedAt,
 		&question.UpdatedAt,
 	)
@@ -180,7 +190,6 @@ func (q *postgresQuestionRepository) UpdateQuestion(ctx context.Context, id stri
 	}
 
 	if params.TagIDs != nil {
-
 		_, err = tx.Exec(ctx, "DELETE FROM question_tags WHERE question_id = $1", id)
 		if err != nil {
 			return Question{}, err

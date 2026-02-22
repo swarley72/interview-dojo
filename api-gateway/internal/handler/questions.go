@@ -15,32 +15,35 @@ import (
 )
 
 type CreateQuestionRequest struct {
-	Title      string  `json:"title" validate:"required,min=1"`
-	ContentMD  *string `json:"content_md"`
-	AnswerMD   *string `json:"answer_md"`
-	Difficulty string  `json:"difficulty" validate:"required,oneof=easy medium hard"`
-	Type       string  `json:"type" validate:"required,oneof=theory coding algorithm system_design"`
-	TagIDs     []int32 `json:"tag_ids"`
+	Title          string  `json:"title" validate:"required,min=1"`
+	ContentMD      *string `json:"content_md"`
+	AnswerMD       *string `json:"answer_md"`
+	ExcalidrawJSON *string `json:"excalidraw_json"`
+	Difficulty     string  `json:"difficulty" validate:"required,oneof=easy medium hard"`
+	Type           string  `json:"type" validate:"required,oneof=theory coding algorithm system_design"`
+	TagIDs         []int32 `json:"tag_ids"`
 }
 
 type UpdateQuestionRequest struct {
-	Title      *string `json:"title"`
-	ContentMD  *string `json:"content_md"`
-	AnswerMD   *string `json:"answer_md"`
-	Difficulty *string `json:"difficulty" validate:"omitempty,oneof=easy medium hard"`
-	Type       *string `json:"type" validate:"omitempty,oneof=theory coding algorithm system_design"`
-	TagIDs     []int32 `json:"tag_ids"`
+	Title          *string `json:"title"`
+	ContentMD      *string `json:"content_md"`
+	AnswerMD       *string `json:"answer_md"`
+	ExcalidrawJSON *string `json:"excalidraw_json"`
+	Difficulty     *string `json:"difficulty" validate:"omitempty,oneof=easy medium hard"`
+	Type           *string `json:"type" validate:"omitempty,oneof=theory coding algorithm system_design"`
+	TagIDs         []int32 `json:"tag_ids"`
 }
 
 type QuestionResponse struct {
-	ID         string        `json:"id"`
-	Title      string        `json:"title"`
-	ContentMD  *string       `json:"content_md"`
-	AnswerMD   *string       `json:"answer_md"`
-	Difficulty string        `json:"difficulty"`
-	Type       string        `json:"type"`
-	TagIDs     []int32       `json:"tag_ids"`
-	Progress   *ProgressInfo `json:"progress"`
+	ID             string        `json:"id"`
+	Title          string        `json:"title"`
+	ContentMD      *string       `json:"content_md"`
+	AnswerMD       *string       `json:"answer_md"`
+	Difficulty     string        `json:"difficulty"`
+	Type           string        `json:"type"`
+	ExcalidrawJSON *string       `json:"excalidraw_json"`
+	TagIDs         []int32       `json:"tag_ids"`
+	Progress       *ProgressInfo `json:"progress"`
 }
 
 type ListQuestionsQueryParams struct {
@@ -96,12 +99,13 @@ func (h *Handler) CreateQuestion(w http.ResponseWriter, req *http.Request) {
 	}
 
 	question, err := h.coreService.CreateQuestion(req.Context(), &corepb.CreateQuestionRequest{
-		Title:      body.Title,
-		ContentMd:  body.ContentMD,
-		AnswerMd:   body.AnswerMD,
-		Difficulty: difficultyProto,
-		Type:       typeProto,
-		TagIds:     body.TagIDs,
+		Title:          body.Title,
+		ContentMd:      body.ContentMD,
+		AnswerMd:       body.AnswerMD,
+		ExcalidrawJson: body.ExcalidrawJSON,
+		Difficulty:     difficultyProto,
+		Type:           typeProto,
+		TagIds:         body.TagIDs,
 	})
 	if err != nil {
 		handleGRPCError(w, err, "failed create question")
@@ -118,8 +122,8 @@ func (h *Handler) CreateQuestion(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *Handler) UpdateQuestion(w http.ResponseWriter, req *http.Request) {
-	idParam := chi.URLParam(req, "id")
-	if idParam == "" {
+	questionID := chi.URLParam(req, "id")
+	if questionID == "" {
 		writeError(w, http.StatusBadRequest, "invalid question id")
 		return
 	}
@@ -156,13 +160,14 @@ func (h *Handler) UpdateQuestion(w http.ResponseWriter, req *http.Request) {
 	}
 
 	question, err := h.coreService.UpdateQuestion(req.Context(), &corepb.UpdateQuestionRequest{
-		QuestionId: idParam,
-		Title:      body.Title,
-		Type:       newQuestionType,
-		Difficulty: newQuestionDifficulty,
-		AnswerMd:   body.AnswerMD,
-		ContentMd:  body.ContentMD,
-		TagIds:     body.TagIDs,
+		QuestionId:     questionID,
+		Title:          body.Title,
+		Type:           newQuestionType,
+		Difficulty:     newQuestionDifficulty,
+		AnswerMd:       body.AnswerMD,
+		ContentMd:      body.ContentMD,
+		ExcalidrawJson: body.ExcalidrawJSON,
+		TagIds:         body.TagIDs,
 	})
 	if err != nil {
 		handleGRPCError(w, err, "update question failed")

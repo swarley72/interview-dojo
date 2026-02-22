@@ -90,14 +90,15 @@ func questionResponseFromProto(q *corepb.Question, p *corepb.UserProgress) (*Que
 	}
 
 	return &QuestionResponse{
-		ID:         q.Id,
-		Title:      q.Title,
-		Type:       questionType,
-		Difficulty: difficulty,
-		TagIDs:     q.TagIds,
-		ContentMD:  q.ContentMd,
-		AnswerMD:   q.AnswerMd,
-		Progress:   progressInfo,
+		ID:             q.Id,
+		Title:          q.Title,
+		Type:           questionType,
+		Difficulty:     difficulty,
+		TagIDs:         q.TagIds,
+		ContentMD:      q.ContentMd,
+		AnswerMD:       q.AnswerMd,
+		ExcalidrawJSON: q.ExcalidrawJson,
+		Progress:       progressInfo,
 	}, nil
 }
 

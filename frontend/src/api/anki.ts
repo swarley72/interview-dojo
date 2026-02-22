@@ -11,4 +11,5 @@ export const ankiApi = {
   },
   recordAnswer: (questionId: string, answer: AnswerQuality) =>
     api.post<UserProgressResponse>(`/anki/${questionId}/answer`, { answer }),
+  resetProgress: () => api.del('/anki/progress'),
 };

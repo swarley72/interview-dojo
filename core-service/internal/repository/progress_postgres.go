@@ -102,6 +102,15 @@ func (up *postgresUserProgressRepository) GetDueQuestionID(ctx context.Context, 
 	return questionID, nil
 }
 
+func (up *postgresUserProgressRepository) ResetProgress(ctx context.Context, userID string) error {
+	_, err := up.pool.Exec(ctx, "DELETE FROM user_progress WHERE user_id = $1", userID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func NewPostgresUserProgressRepository(pool *pgxpool.Pool) UserProgressRepository {
 	return &postgresUserProgressRepository{pool}
 }

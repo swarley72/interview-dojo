@@ -43,12 +43,13 @@ func (g *GRPCServer) CreateQuestion(ctx context.Context, req *corepb.CreateQuest
 	}
 
 	question, err := g.questionService.CreateQuestion(ctx, repository.CreateQuestionParams{
-		Title:      req.Title,
-		ContentMD:  req.ContentMd,
-		AnswerMD:   req.AnswerMd,
-		Type:       questionType,
-		Difficulty: questionDifficulty,
-		TagIDs:     req.TagIds,
+		Title:          req.Title,
+		ContentMD:      req.ContentMd,
+		AnswerMD:       req.AnswerMd,
+		ExcalidrawJSON: req.ExcalidrawJson,
+		Type:           questionType,
+		Difficulty:     questionDifficulty,
+		TagIDs:         req.TagIds,
 	})
 	if err != nil {
 		return nil, mapError(err)
@@ -82,12 +83,13 @@ func (g *GRPCServer) UpdateQuestion(ctx context.Context, req *corepb.UpdateQuest
 	}
 
 	question, err := g.questionService.UpdateQuestion(ctx, req.QuestionId, repository.UpdateQuestionParams{
-		Title:      req.Title,
-		ContentMD:  req.ContentMd,
-		AnswerMD:   req.AnswerMd,
-		Type:       questionType,
-		Difficulty: questionDifficulty,
-		TagIDs:     req.TagIds,
+		Title:          req.Title,
+		ContentMD:      req.ContentMd,
+		AnswerMD:       req.AnswerMd,
+		ExcalidrawJSON: req.ExcalidrawJson,
+		Type:           questionType,
+		Difficulty:     questionDifficulty,
+		TagIDs:         req.TagIds,
 	})
 	if err != nil {
 		return nil, mapError(err)
