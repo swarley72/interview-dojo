@@ -4,7 +4,8 @@ import { ankiApi } from '../api/anki';
 import { QuestionView } from '../components/QuestionView';
 import { AnswerRating } from '../components/AnswerRating';
 import { ApiError } from '../api/client';
-import { RefreshCw, Loader2, PartyPopper, BarChart3 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { RefreshCw, Loader2, PartyPopper, BarChart3, ExternalLink } from 'lucide-react';
 
 export function ReviewPage() {
   const [question, setQuestion] = useState<Question | null>(null);
@@ -69,10 +70,19 @@ export function ReviewPage() {
 
   return (
     <div className="max-w-6xl">
-      <h1 className="text-xl font-bold text-text-primary mb-6 flex items-center gap-2">
-        <RefreshCw className="w-5 h-5 text-accent" />
-        Повторение
-      </h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-xl font-bold text-text-primary flex items-center gap-2">
+          <RefreshCw className="w-5 h-5 text-accent" />
+          Повторение
+        </h1>
+        <Link
+          to={`/questions/${question.id}`}
+          className="flex items-center gap-1.5 text-sm text-text-muted hover:text-accent transition-colors"
+        >
+          Открыть вопрос
+          <ExternalLink className="w-3.5 h-3.5" />
+        </Link>
+      </div>
       <QuestionView question={question}>
         <div className="mt-6 space-y-4">
           <AnswerRating onRate={handleRate} disabled={rating || !!result} />

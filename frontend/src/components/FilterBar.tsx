@@ -1,36 +1,51 @@
 import { useQuestionsStore } from '../stores/questions';
+import { useTagsStore } from '../stores/tags';
 import { Filter } from 'lucide-react';
+import { Dropdown, MultiDropdown } from './Dropdown';
+
+const difficultyOptions = [
+  { value: 'easy', label: 'Легко' },
+  { value: 'medium', label: 'Средне' },
+  { value: 'hard', label: 'Сложно' },
+];
+
+const typeOptions = [
+  { value: 'theory', label: 'Theory' },
+  { value: 'coding', label: 'Coding' },
+  { value: 'algorithm', label: 'Algorithm' },
+  { value: 'system_design', label: 'System Design' },
+];
 
 export function FilterBar() {
-  const { filterDifficulty, filterType, setFilter } = useQuestionsStore();
+  const { filterDifficulty, filterType, filterTagIds, setFilter, setFilterTagIds } =
+    useQuestionsStore();
+  const tags = useTagsStore((s) => s.tags);
 
-  const selectClass =
-    'bg-surface-raised text-text-primary border border-border-default rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-accent transition-colors appearance-none cursor-pointer';
+  const tagOptions = tags.map((t) => ({ value: t.id, label: t.name }));
 
   return (
     <div className="flex items-center gap-3 flex-wrap">
       <Filter className="w-4 h-4 text-text-muted" />
-      <select
+      <Dropdown
         value={filterDifficulty}
-        onChange={(e) => setFilter('filterDifficulty', e.target.value)}
-        className={selectClass}
-      >
-        <option value="">Все сложности</option>
-        <option value="easy">Easy</option>
-        <option value="medium">Medium</option>
-        <option value="hard">Hard</option>
-      </select>
-      <select
+        options={difficultyOptions}
+        placeholder="Все сложности"
+        onChange={(v) => setFilter('filterDifficulty', v)}
+      />
+      <Dropdown
         value={filterType}
-        onChange={(e) => setFilter('filterType', e.target.value)}
-        className={selectClass}
-      >
-        <option value="">Все типы</option>
-        <option value="theory">Theory</option>
-        <option value="coding">Coding</option>
-        <option value="algorithm">Algorithm</option>
-        <option value="system_design">System Design</option>
-      </select>
+        options={typeOptions}
+        placeholder="Все типы"
+        onChange={(v) => setFilter('filterType', v)}
+      />
+      {tags.length > 0 && (
+        <MultiDropdown
+          selected={filterTagIds}
+          options={tagOptions}
+          placeholder="Теги"
+          onChange={setFilterTagIds}
+        />
+      )}
     </div>
   );
 }

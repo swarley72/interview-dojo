@@ -44,8 +44,13 @@ body {
   border-radius: 0.5rem;
 }
 
+.prose pre code {
+  color: var(--color-text-primary);
+}
+
 .prose :not(pre) > code {
   background: var(--color-surface-overlay);
+  color: var(--color-text-primary);
   padding: 0.15rem 0.35rem;
   border-radius: 0.25rem;
   font-size: 0.85em;

@@ -2,9 +2,9 @@ import type { Difficulty } from '../types';
 import { Signal, SignalMedium, SignalLow } from 'lucide-react';
 
 const config: Record<Difficulty, { class: string; icon: typeof Signal; label: string }> = {
-  easy: { class: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20', icon: SignalLow, label: 'easy' },
-  medium: { class: 'bg-amber-500/10 text-amber-400 border-amber-500/20', icon: SignalMedium, label: 'medium' },
-  hard: { class: 'bg-red-500/10 text-red-400 border-red-500/20', icon: Signal, label: 'hard' },
+  easy: { class: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20', icon: SignalLow, label: 'Легко' },
+  medium: { class: 'bg-amber-500/10 text-amber-400 border-amber-500/20', icon: SignalMedium, label: 'Средне' },
+  hard: { class: 'bg-red-500/10 text-red-400 border-red-500/20', icon: Signal, label: 'Сложно' },
 };
 
 export function DifficultyBadge({ difficulty }: { difficulty: Difficulty }) {

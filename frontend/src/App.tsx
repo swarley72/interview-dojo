@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { LoginPage } from './pages/LoginPage';
@@ -11,6 +11,25 @@ import { ReviewPage } from './pages/ReviewPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { useAuthStore } from './stores/auth';
 
+const router = createBrowserRouter([
+  { path: '/login', element: <LoginPage /> },
+  { path: '/register', element: <RegisterPage /> },
+  {
+    element: (
+      <ProtectedRoute>
+        <Layout />
+      </ProtectedRoute>
+    ),
+    children: [
+      { path: '/', element: <CatalogPage /> },
+      { path: '/questions/new', element: <CreateQuestionPage /> },
+      { path: '/questions/:id', element: <QuestionPage /> },
+      { path: '/review', element: <ReviewPage /> },
+    ],
+  },
+  { path: '*', element: <NotFoundPage /> },
+]);
+
 export default function App() {
   const init = useAuthStore((s) => s.init);
 
@@ -18,25 +37,5 @@ export default function App() {
     init();
   }, [init]);
 
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route
-          element={
-            <ProtectedRoute>
-              <Layout />
-            </ProtectedRoute>
-          }
-        >
-          <Route path="/" element={<CatalogPage />} />
-          <Route path="/questions/new" element={<CreateQuestionPage />} />
-          <Route path="/questions/:id" element={<QuestionPage />} />
-          <Route path="/review" element={<ReviewPage />} />
-        </Route>
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
-    </BrowserRouter>
-  );
+  return <RouterProvider router={router} />;
 }

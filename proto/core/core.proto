@@ -66,6 +66,7 @@ message ListQuestionsRequest {
     int32 offset = 2;
     optional QuestionType type = 3;
     optional Difficulty difficulty = 4;
+    repeated int32 tag_ids = 5;
 }
 
 message ListQuestionsResponse {

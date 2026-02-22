@@ -49,6 +49,7 @@ type ListQuestionsFilters struct {
 	Offset     int
 	Type       *string
 	Difficulty *string
+	TagIDs     []int32
 }
 
 type ListQuestionsResult struct {

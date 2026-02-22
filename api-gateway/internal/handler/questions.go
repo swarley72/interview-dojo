@@ -48,6 +48,7 @@ type ListQuestionsQueryParams struct {
 	Type       string `validate:"omitempty,oneof=theory coding algorithm system_design"`
 	Page       int32  `validate:"omitempty,min=1"`
 	Limit      int32  `validate:"omitempty,min=1,max=100"`
+	TagIDs     []int32
 }
 
 type QuestionResponseShort struct {
@@ -236,12 +237,24 @@ func (h *Handler) ListQuestions(w http.ResponseWriter, req *http.Request) {
 	q := req.URL.Query()
 	page, _ := strconv.Atoi(q.Get("page"))
 	limit, _ := strconv.Atoi(q.Get("limit"))
+	tagStrs := q["tag_id"]
+
+	var tagIDs []int32
+	for _, s := range tagStrs {
+		id, err := strconv.Atoi(s)
+		if err != nil {
+			writeError(w, http.StatusBadRequest, "invalid tag_id query")
+			return
+		}
+		tagIDs = append(tagIDs, int32(id))
+	}
 
 	params := ListQuestionsQueryParams{
 		Limit:      int32(limit),
 		Page:       int32(page),
 		Type:       q.Get("type"),
 		Difficulty: q.Get("difficulty"),
+		TagIDs:     tagIDs,
 	}
 
 	if err := h.validate.Struct(params); err != nil {
@@ -281,6 +294,7 @@ func (h *Handler) ListQuestions(w http.ResponseWriter, req *http.Request) {
 		Offset:     int32((params.Page - 1) * params.Limit),
 		Difficulty: difficulty,
 		Type:       questionType,
+		TagIds:     params.TagIDs,
 	})
 	if err != nil {
 		handleGRPCError(w, err, "list questions failed")

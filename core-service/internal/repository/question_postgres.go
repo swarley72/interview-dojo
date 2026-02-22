@@ -86,7 +86,6 @@ func (q *postgresQuestionRepository) GetQuestionByID(ctx context.Context, id str
 		FROM questions
 		WHERE id = $1
 	`
-	tagsQuery := "SELECT tag_id FROM question_tags WHERE question_id = $1 ORDER BY tag_id"
 	err := q.pool.QueryRow(ctx, questionQuery, id).Scan(
 		&question.ID,
 		&question.Type,
@@ -101,22 +100,14 @@ func (q *postgresQuestionRepository) GetQuestionByID(ctx context.Context, id str
 		return Question{}, err
 	}
 
-	rows, err := q.pool.Query(ctx, tagsQuery, id)
+	tags, err := q.loadTagsForQuestions(ctx, []string{question.ID})
 	if err != nil {
 		return Question{}, err
 	}
-	defer rows.Close()
 
-	for rows.Next() {
-		var tagID int32
-		err := rows.Scan(&tagID)
-		if err != nil {
-			return Question{}, err
-		}
-		question.TagIDs = append(question.TagIDs, tagID)
-	}
+	question.TagIDs = tags[question.ID]
 
-	return question, rows.Err()
+	return question, nil
 }
 
 func (q *postgresQuestionRepository) UpdateQuestion(ctx context.Context, id string, params UpdateQuestionParams) (Question, error) {
@@ -272,6 +263,13 @@ func (q *postgresQuestionRepository) ListQuestions(ctx context.Context, filters 
 		argIndex++
 	}
 
+	if len(filters.TagIDs) > 0 {
+		conditions = append(conditions, fmt.Sprintf("id IN (SELECT question_id FROM question_tags WHERE tag_id = ANY($%d))",
+			argIndex))
+		filterArgs = append(filterArgs, filters.TagIDs)
+		argIndex++
+	}
+
 	if len(conditions) > 0 {
 		whereClause = " WHERE " + strings.Join(conditions, " AND ")
 	}
@@ -317,6 +315,19 @@ func (q *postgresQuestionRepository) ListQuestions(ctx context.Context, filters 
 		return ListQuestionsResult{}, err
 	}
 
+	ids := make([]string, len(questions))
+	for i, q := range questions {
+		ids[i] = q.ID
+	}
+	tags, err := q.loadTagsForQuestions(ctx, ids)
+	if err != nil {
+		return ListQuestionsResult{}, err
+	}
+
+	for i := range questions {
+		questions[i].TagIDs = tags[questions[i].ID]
+	}
+
 	return ListQuestionsResult{Questions: questions, TotalCount: totalCount}, nil
 }
 
@@ -333,6 +344,32 @@ func (q *postgresQuestionRepository) GetNewQuestionID(ctx context.Context, userI
 	}
 
 	return questionID, nil
+}
+
+func (r *postgresQuestionRepository) loadTagsForQuestions(ctx context.Context, questionIDs []string) (map[string][]int32, error) {
+	query := "SELECT question_id, tag_id FROM question_tags WHERE question_id = ANY($1)"
+	rows, err := r.pool.Query(ctx, query, questionIDs)
+	if err != nil {
+		return map[string][]int32{}, err
+	}
+	defer rows.Close()
+
+	res := make(map[string][]int32, len(questionIDs))
+	for rows.Next() {
+		var questionID string
+		var tagID int32
+
+		err := rows.Scan(
+			&questionID,
+			&tagID,
+		)
+		if err != nil {
+			return map[string][]int32{}, err
+		}
+		res[questionID] = append(res[questionID], tagID)
+	}
+
+	return res, rows.Err()
 }
 
 func NewPostgresQuestionRepository(pool *pgxpool.Pool) QuestionRepository {

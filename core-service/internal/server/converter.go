@@ -41,7 +41,7 @@ func difficultyToProto(d string) (corepb.Difficulty, error) {
 var questionTypeFromProtoMap = map[corepb.QuestionType]string{
 	corepb.QuestionType_QUESTION_TYPE_THEORY:        "theory",
 	corepb.QuestionType_QUESTION_TYPE_CODING:        "coding",
-	corepb.QuestionType_QUESTION_TYPE_ALGORITHM:     "algorithms",
+	corepb.QuestionType_QUESTION_TYPE_ALGORITHM:     "algorithm",
 	corepb.QuestionType_QUESTION_TYPE_SYSTEM_DESIGN: "system_design",
 }
 
@@ -56,7 +56,7 @@ func questionTypeFromProto(t corepb.QuestionType) (string, error) {
 var questionTypeToProtoMap = map[string]corepb.QuestionType{
 	"theory":        corepb.QuestionType_QUESTION_TYPE_THEORY,
 	"coding":        corepb.QuestionType_QUESTION_TYPE_CODING,
-	"algorithms":    corepb.QuestionType_QUESTION_TYPE_ALGORITHM,
+	"algorithm":     corepb.QuestionType_QUESTION_TYPE_ALGORITHM,
 	"system_design": corepb.QuestionType_QUESTION_TYPE_SYSTEM_DESIGN,
 }
 

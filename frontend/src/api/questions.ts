@@ -6,6 +6,7 @@ interface ListParams {
   limit?: number;
   difficulty?: Difficulty | '';
   type?: QuestionType | '';
+  tagIds?: number[];
 }
 
 export const questionsApi = {
@@ -15,6 +16,9 @@ export const questionsApi = {
     if (params.limit) query.set('limit', String(params.limit));
     if (params.difficulty) query.set('difficulty', params.difficulty);
     if (params.type) query.set('type', params.type);
+    if (params.tagIds) {
+      for (const id of params.tagIds) query.append('tag_id', String(id));
+    }
     return api.get<ListQuestionsResponse>(`/questions?${query}`);
   },
 

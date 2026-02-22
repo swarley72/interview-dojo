@@ -38,6 +38,8 @@ func mapError(err error) error {
 		return status.Error(codes.NotFound, "user progress not found")
 	case errors.Is(err, service.ErrNoQuestionsAvailable):
 		return status.Error(codes.NotFound, "question not found")
+	case errors.Is(err, service.ErrTagAlreadyExists):
+		return status.Error(codes.AlreadyExists, "tag already exists")
 	default:
 		return status.Error(codes.Internal, "internal error")
 	}

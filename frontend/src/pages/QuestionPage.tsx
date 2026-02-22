@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useParams, useNavigate, useBlocker } from 'react-router-dom';
 import type { Question, Difficulty, QuestionType } from '../types';
 import { questionsApi } from '../api/questions';
 import { useAuthStore } from '../stores/auth';
@@ -7,6 +7,7 @@ import { useTagsStore } from '../stores/tags';
 import { QuestionView } from '../components/QuestionView';
 import { MarkdownEditor } from '../components/MarkdownEditor';
 import { ConfirmModal } from '../components/ConfirmModal';
+import { TagSelector } from '../components/TagSelector';
 import { Pencil, Save, X, Loader2, Trash2 } from 'lucide-react';
 
 export function QuestionPage() {
@@ -16,7 +17,7 @@ export function QuestionPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const user = useAuthStore((s) => s.user);
-  const { tags, fetchTags } = useTagsStore();
+  const fetchTags = useTagsStore((s) => s.fetchTags);
 
   const [editing, setEditing] = useState(false);
   const [editTitle, setEditTitle] = useState('');
@@ -28,6 +29,27 @@ export function QuestionPage() {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  const isDirty = useMemo(() => {
+    if (!editing || !question) return false;
+    return (
+      editTitle !== question.title ||
+      editDifficulty !== question.difficulty ||
+      editType !== question.type ||
+      editContent !== (question.content_md ?? '') ||
+      editAnswer !== (question.answer_md ?? '') ||
+      JSON.stringify(editTagIds) !== JSON.stringify(question.tag_ids ?? [])
+    );
+  }, [editing, question, editTitle, editDifficulty, editType, editContent, editAnswer, editTagIds]);
+
+  const blocker = useBlocker(editing && isDirty);
+
+  useEffect(() => {
+    if (!editing || !isDirty) return;
+    const handler = (e: BeforeUnloadEvent) => e.preventDefault();
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [editing, isDirty]);
 
   useEffect(() => {
     fetchTags();
@@ -56,7 +78,15 @@ export function QuestionPage() {
     setEditing(true);
   };
 
-  const cancelEditing = () => setEditing(false);
+  const [showUnsavedModal, setShowUnsavedModal] = useState(false);
+
+  const cancelEditing = useCallback(() => {
+    if (isDirty) {
+      setShowUnsavedModal(true);
+      return;
+    }
+    setEditing(false);
+  }, [isDirty]);
 
   const saveEditing = async () => {
     if (!id) return;
@@ -91,12 +121,6 @@ export function QuestionPage() {
     } finally {
       setDeleting(false);
     }
-  };
-
-  const toggleTag = (tagId: number) => {
-    setEditTagIds((prev) =>
-      prev.includes(tagId) ? prev.filter((id) => id !== tagId) : [...prev, tagId],
-    );
   };
 
   const inputClass =
@@ -148,21 +172,7 @@ export function QuestionPage() {
             <option value="system_design">System Design</option>
           </select>
         </div>
-        <div className="flex gap-2 flex-wrap">
-          {tags.map((tag) => (
-            <button
-              key={tag.id}
-              onClick={() => toggleTag(tag.id)}
-              className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
-                editTagIds.includes(tag.id)
-                  ? 'bg-accent/10 text-accent border-accent/30'
-                  : 'bg-surface-overlay text-text-muted border-border-default hover:border-border-hover'
-              }`}
-            >
-              {tag.name}
-            </button>
-          ))}
-        </div>
+        <TagSelector selected={editTagIds} onChange={setEditTagIds} />
         <MarkdownEditor
           value={editContent}
           onChange={setEditContent}
@@ -191,6 +201,27 @@ export function QuestionPage() {
           </button>
         </div>
         {error && <p className="text-red-400 text-sm">{error}</p>}
+
+        <ConfirmModal
+          open={showUnsavedModal}
+          title="Несохранённые изменения"
+          message="У вас есть несохранённые изменения. Уйти без сохранения?"
+          confirmLabel="Уйти"
+          onConfirm={() => {
+            setShowUnsavedModal(false);
+            setEditing(false);
+          }}
+          onCancel={() => setShowUnsavedModal(false)}
+        />
+
+        <ConfirmModal
+          open={blocker.state === 'blocked'}
+          title="Несохранённые изменения"
+          message="У вас есть несохранённые изменения. Покинуть страницу без сохранения?"
+          confirmLabel="Покинуть"
+          onConfirm={() => blocker.proceed?.()}
+          onCancel={() => blocker.reset?.()}
+        />
       </div>
     );
   }

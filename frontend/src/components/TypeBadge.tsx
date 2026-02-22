@@ -2,10 +2,10 @@ import type { QuestionType } from '../types';
 import { BookOpen, Code, Cpu, Network } from 'lucide-react';
 
 const config: Record<QuestionType, { label: string; icon: typeof BookOpen }> = {
-  theory: { label: 'theory', icon: BookOpen },
-  coding: { label: 'coding', icon: Code },
-  algorithm: { label: 'algorithm', icon: Cpu },
-  system_design: { label: 'system design', icon: Network },
+  theory: { label: 'Theory', icon: BookOpen },
+  coding: { label: 'Coding', icon: Code },
+  algorithm: { label: 'Algorithm', icon: Cpu },
+  system_design: { label: 'System Design', icon: Network },
 };
 
 export function TypeBadge({ type }: { type: QuestionType }) {

@@ -125,6 +125,7 @@ func (g *GRPCServer) ListQuestions(ctx context.Context, req *corepb.ListQuestion
 		Offset:     int(req.Offset),
 		Type:       questionType,
 		Difficulty: questionDifficulty,
+		TagIDs:     req.TagIds,
 	})
 	if err != nil {
 		return nil, mapError(err)

@@ -4,11 +4,12 @@ import type { Difficulty, QuestionType } from '../types';
 import { questionsApi } from '../api/questions';
 import { useTagsStore } from '../stores/tags';
 import { MarkdownEditor } from '../components/MarkdownEditor';
+import { TagSelector } from '../components/TagSelector';
 import { Plus, Save } from 'lucide-react';
 
 export function CreateQuestionPage() {
   const navigate = useNavigate();
-  const { tags, fetchTags } = useTagsStore();
+  const fetchTags = useTagsStore((s) => s.fetchTags);
 
   const [title, setTitle] = useState('');
   const [difficulty, setDifficulty] = useState<Difficulty>('easy');
@@ -22,12 +23,6 @@ export function CreateQuestionPage() {
   useEffect(() => {
     fetchTags();
   }, []);
-
-  const toggleTag = (tagId: number) => {
-    setTagIds((prev) =>
-      prev.includes(tagId) ? prev.filter((id) => id !== tagId) : [...prev, tagId],
-    );
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,22 +94,7 @@ export function CreateQuestionPage() {
           </select>
         </div>
 
-        <div className="flex gap-2 flex-wrap">
-          {tags.map((tag) => (
-            <button
-              key={tag.id}
-              type="button"
-              onClick={() => toggleTag(tag.id)}
-              className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
-                tagIds.includes(tag.id)
-                  ? 'bg-accent/10 text-accent border-accent/30'
-                  : 'bg-surface-overlay text-text-muted border-border-default hover:border-border-hover'
-              }`}
-            >
-              {tag.name}
-            </button>
-          ))}
-        </div>
+        <TagSelector selected={tagIds} onChange={setTagIds} />
 
         <MarkdownEditor
           value={contentMd}

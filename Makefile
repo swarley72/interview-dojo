@@ -1,4 +1,4 @@
-.PHONY: proto proto-install clean up up-backend down build image-prune migrate superuser
+.PHONY: proto proto-install clean up up-backend down build image-prune migrate superuser seed
 
 proto:
 	protoc --proto_path=. --proto_path=proto \
@@ -27,6 +27,9 @@ migrate:
 superuser:
 	DATABASE_URL="postgres://kim:kim@localhost:5432/user_service?sslmode=disable" \
 		go run ./user-service/cmd/createsuperuser -login $(login) -password $(password)
+
+seed:
+	docker compose exec -T postgres psql -U kim -d core_service < core-service/seeds/seed_questions.sql
 
 down:
 	docker compose down

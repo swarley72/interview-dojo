@@ -492,6 +492,7 @@ type ListQuestionsRequest struct {
 	Offset        int32                  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset,omitempty"`
 	Type          *QuestionType          `protobuf:"varint,3,opt,name=type,proto3,enum=core.QuestionType,oneof" json:"type,omitempty"`
 	Difficulty    *Difficulty            `protobuf:"varint,4,opt,name=difficulty,proto3,enum=core.Difficulty,oneof" json:"difficulty,omitempty"`
+	TagIds        []int32                `protobuf:"varint,5,rep,packed,name=tag_ids,json=tagIds,proto3" json:"tag_ids,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -552,6 +553,13 @@ func (x *ListQuestionsRequest) GetDifficulty() Difficulty {
 		return *x.Difficulty
 	}
 	return Difficulty_DIFFICULTY_UNSPECIFIED
+}
+
+func (x *ListQuestionsRequest) GetTagIds() []int32 {
+	if x != nil {
+		return x.TagIds
+	}
+	return nil
 }
 
 type ListQuestionsResponse struct {
@@ -1153,14 +1161,15 @@ const file_proto_core_core_proto_rawDesc = "" +
 	"\x0enext_review_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\fnextReviewAt\"5\n" +
 	"\x12GetQuestionRequest\x12\x1f\n" +
 	"\vquestion_id\x18\x01 \x01(\tR\n" +
-	"questionId\"\xc0\x01\n" +
+	"questionId\"\xd9\x01\n" +
 	"\x14ListQuestionsRequest\x12\x14\n" +
 	"\x05limit\x18\x01 \x01(\x05R\x05limit\x12\x16\n" +
 	"\x06offset\x18\x02 \x01(\x05R\x06offset\x12+\n" +
 	"\x04type\x18\x03 \x01(\x0e2\x12.core.QuestionTypeH\x00R\x04type\x88\x01\x01\x125\n" +
 	"\n" +
 	"difficulty\x18\x04 \x01(\x0e2\x10.core.DifficultyH\x01R\n" +
-	"difficulty\x88\x01\x01B\a\n" +
+	"difficulty\x88\x01\x01\x12\x17\n" +
+	"\atag_ids\x18\x05 \x03(\x05R\x06tagIdsB\a\n" +
 	"\x05_typeB\r\n" +
 	"\v_difficulty\"f\n" +
 	"\x15ListQuestionsResponse\x12,\n" +
