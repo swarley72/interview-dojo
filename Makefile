@@ -47,7 +47,7 @@ image-prune:
 
 dump:
 	mkdir -p dumps
-	docker compose exec -T postgres pg_dump -U kim core_service | zstd -o dumps/core_service_$(shell date +%Y%m%d_%H%M%S).sql.zst
+	docker compose exec -T postgres pg_dump -U kim --clean core_service | zstd -o dumps/core_service_$(shell date +%Y%m%d_%H%M%S).sql.zst
 
 restore:
 	zstd -dc $(or $(file),$(shell ls -t dumps/*.sql.zst | head -1)) | docker compose exec -T postgres psql -U kim -d core_service
