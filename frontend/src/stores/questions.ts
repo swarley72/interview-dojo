@@ -10,10 +10,15 @@ interface QuestionsState {
   filterDifficulty: Difficulty | '';
   filterType: QuestionType | '';
   filterTagIds: number[];
+  filterVerified: '' | 'true' | 'false';
+  searchQuery: string;
   isLoading: boolean;
+  isFetching: boolean;
+  initialized: boolean;
 
-  setFilter: (key: 'filterDifficulty' | 'filterType', value: string) => void;
+  setFilter: (key: 'filterDifficulty' | 'filterType' | 'filterVerified', value: string) => void;
   setFilterTagIds: (tagIds: number[]) => void;
+  setSearchQuery: (query: string) => void;
   setPage: (page: number) => void;
   fetchQuestions: () => Promise<void>;
 }
@@ -26,7 +31,11 @@ export const useQuestionsStore = create<QuestionsState>((set, get) => ({
   filterDifficulty: '',
   filterType: '',
   filterTagIds: [],
+  filterVerified: '',
+  searchQuery: '',
   isLoading: false,
+  isFetching: false,
+  initialized: false,
 
   setFilter: (key, value) => {
     set({ [key]: value, page: 1 } as Partial<QuestionsState>);
@@ -38,14 +47,19 @@ export const useQuestionsStore = create<QuestionsState>((set, get) => ({
     get().fetchQuestions();
   },
 
+  setSearchQuery: (query) => {
+    set({ searchQuery: query, page: 1 });
+    get().fetchQuestions();
+  },
+
   setPage: (page) => {
     set({ page });
     get().fetchQuestions();
   },
 
   fetchQuestions: async () => {
-    const { page, limit, filterDifficulty, filterType, filterTagIds } = get();
-    set({ isLoading: true });
+    const { page, limit, filterDifficulty, filterType, filterTagIds, filterVerified, searchQuery, initialized } = get();
+    set({ isLoading: !initialized, isFetching: true });
     try {
       const res = await questionsApi.list({
         page,
@@ -53,10 +67,12 @@ export const useQuestionsStore = create<QuestionsState>((set, get) => ({
         difficulty: filterDifficulty,
         type: filterType,
         tagIds: filterTagIds.length > 0 ? filterTagIds : undefined,
+        verified: filterVerified === '' ? undefined : filterVerified === 'true',
+        q: searchQuery || undefined,
       });
-      set({ items: res.items ?? [], totalCount: res.total_count, isLoading: false });
+      set({ items: res.items ?? [], totalCount: res.total_count, isLoading: false, isFetching: false, initialized: true });
     } catch {
-      set({ isLoading: false });
+      set({ isLoading: false, isFetching: false });
     }
   },
 }));

@@ -19,6 +19,7 @@ export function CreateQuestionPage() {
   const [answerMd, setAnswerMd] = useState('');
   const [tagIds, setTagIds] = useState<number[]>([]);
   const [excalidrawJson, setExcalidrawJson] = useState('');
+  const [verified, setVerified] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -40,6 +41,7 @@ export function CreateQuestionPage() {
         answer_md: answerMd || undefined,
         excalidraw_json: excalidrawJson || undefined,
         tag_ids: tagIds.length > 0 ? tagIds : undefined,
+        verified,
       });
       navigate(`/questions/${q.id}`);
     } catch (e) {
@@ -98,6 +100,16 @@ export function CreateQuestionPage() {
         </div>
 
         <TagSelector selected={tagIds} onChange={setTagIds} />
+
+        <label className="flex items-center gap-2 cursor-pointer w-fit">
+          <input
+            type="checkbox"
+            checked={verified}
+            onChange={(e) => setVerified(e.target.checked)}
+            className="w-4 h-4 accent-accent rounded"
+          />
+          <span className="text-sm text-text-secondary">Verified</span>
+        </label>
 
         <MarkdownEditor
           value={contentMd}

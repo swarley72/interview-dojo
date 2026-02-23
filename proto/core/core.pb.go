@@ -246,6 +246,7 @@ type Question struct {
 	CreatedAt      *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt      *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	ExcalidrawJson *string                `protobuf:"bytes,10,opt,name=excalidraw_json,json=excalidrawJson,proto3,oneof" json:"excalidraw_json,omitempty"`
+	Verified       bool                   `protobuf:"varint,11,opt,name=verified,proto3" json:"verified,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -348,6 +349,13 @@ func (x *Question) GetExcalidrawJson() string {
 		return *x.ExcalidrawJson
 	}
 	return ""
+}
+
+func (x *Question) GetVerified() bool {
+	if x != nil {
+		return x.Verified
+	}
+	return false
 }
 
 type UserProgress struct {
@@ -501,6 +509,8 @@ type ListQuestionsRequest struct {
 	Type          *QuestionType          `protobuf:"varint,3,opt,name=type,proto3,enum=core.QuestionType,oneof" json:"type,omitempty"`
 	Difficulty    *Difficulty            `protobuf:"varint,4,opt,name=difficulty,proto3,enum=core.Difficulty,oneof" json:"difficulty,omitempty"`
 	TagIds        []int32                `protobuf:"varint,5,rep,packed,name=tag_ids,json=tagIds,proto3" json:"tag_ids,omitempty"`
+	Verified      *bool                  `protobuf:"varint,6,opt,name=verified,proto3,oneof" json:"verified,omitempty"`
+	Query         *string                `protobuf:"bytes,7,opt,name=query,proto3,oneof" json:"query,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -570,6 +580,20 @@ func (x *ListQuestionsRequest) GetTagIds() []int32 {
 	return nil
 }
 
+func (x *ListQuestionsRequest) GetVerified() bool {
+	if x != nil && x.Verified != nil {
+		return *x.Verified
+	}
+	return false
+}
+
+func (x *ListQuestionsRequest) GetQuery() string {
+	if x != nil && x.Query != nil {
+		return *x.Query
+	}
+	return ""
+}
+
 type ListQuestionsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Questions     []*Question            `protobuf:"bytes,1,rep,name=questions,proto3" json:"questions,omitempty"`
@@ -631,6 +655,7 @@ type CreateQuestionRequest struct {
 	Type           QuestionType           `protobuf:"varint,5,opt,name=type,proto3,enum=core.QuestionType" json:"type,omitempty"`
 	TagIds         []int32                `protobuf:"varint,6,rep,packed,name=tag_ids,json=tagIds,proto3" json:"tag_ids,omitempty"`
 	ExcalidrawJson *string                `protobuf:"bytes,7,opt,name=excalidraw_json,json=excalidrawJson,proto3,oneof" json:"excalidraw_json,omitempty"`
+	Verified       bool                   `protobuf:"varint,8,opt,name=verified,proto3" json:"verified,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -714,6 +739,13 @@ func (x *CreateQuestionRequest) GetExcalidrawJson() string {
 	return ""
 }
 
+func (x *CreateQuestionRequest) GetVerified() bool {
+	if x != nil {
+		return x.Verified
+	}
+	return false
+}
+
 type DeleteQuestionRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	QuestionId    string                 `protobuf:"bytes,1,opt,name=question_id,json=questionId,proto3" json:"question_id,omitempty"`
@@ -768,6 +800,7 @@ type UpdateQuestionRequest struct {
 	Difficulty     *Difficulty            `protobuf:"varint,6,opt,name=difficulty,proto3,enum=core.Difficulty,oneof" json:"difficulty,omitempty"`
 	TagIds         []int32                `protobuf:"varint,7,rep,packed,name=tag_ids,json=tagIds,proto3" json:"tag_ids,omitempty"`
 	ExcalidrawJson *string                `protobuf:"bytes,8,opt,name=excalidraw_json,json=excalidrawJson,proto3,oneof" json:"excalidraw_json,omitempty"`
+	Verified       *bool                  `protobuf:"varint,9,opt,name=verified,proto3,oneof" json:"verified,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -856,6 +889,13 @@ func (x *UpdateQuestionRequest) GetExcalidrawJson() string {
 		return *x.ExcalidrawJson
 	}
 	return ""
+}
+
+func (x *UpdateQuestionRequest) GetVerified() bool {
+	if x != nil && x.Verified != nil {
+		return *x.Verified
+	}
+	return false
 }
 
 type CreateTagRequest struct {
@@ -1213,7 +1253,7 @@ const file_proto_core_core_proto_rawDesc = "" +
 	"\x15proto/core/core.proto\x12\x04core\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bgoogle/protobuf/empty.proto\")\n" +
 	"\x03Tag\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\"\xbe\x03\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\"\xda\x03\n" +
 	"\bQuestion\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12\"\n" +
@@ -1230,7 +1270,8 @@ const file_proto_core_core_proto_rawDesc = "" +
 	"\n" +
 	"updated_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12,\n" +
 	"\x0fexcalidraw_json\x18\n" +
-	" \x01(\tH\x02R\x0eexcalidrawJson\x88\x01\x01B\r\n" +
+	" \x01(\tH\x02R\x0eexcalidrawJson\x88\x01\x01\x12\x1a\n" +
+	"\bverified\x18\v \x01(\bR\bverifiedB\r\n" +
 	"\v_content_mdB\f\n" +
 	"\n" +
 	"_answer_mdB\x12\n" +
@@ -1248,7 +1289,7 @@ const file_proto_core_core_proto_rawDesc = "" +
 	"\x0enext_review_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\fnextReviewAt\"5\n" +
 	"\x12GetQuestionRequest\x12\x1f\n" +
 	"\vquestion_id\x18\x01 \x01(\tR\n" +
-	"questionId\"\xd9\x01\n" +
+	"questionId\"\xac\x02\n" +
 	"\x14ListQuestionsRequest\x12\x14\n" +
 	"\x05limit\x18\x01 \x01(\x05R\x05limit\x12\x16\n" +
 	"\x06offset\x18\x02 \x01(\x05R\x06offset\x12+\n" +
@@ -1256,13 +1297,17 @@ const file_proto_core_core_proto_rawDesc = "" +
 	"\n" +
 	"difficulty\x18\x04 \x01(\x0e2\x10.core.DifficultyH\x01R\n" +
 	"difficulty\x88\x01\x01\x12\x17\n" +
-	"\atag_ids\x18\x05 \x03(\x05R\x06tagIdsB\a\n" +
+	"\atag_ids\x18\x05 \x03(\x05R\x06tagIds\x12\x1f\n" +
+	"\bverified\x18\x06 \x01(\bH\x02R\bverified\x88\x01\x01\x12\x19\n" +
+	"\x05query\x18\a \x01(\tH\x03R\x05query\x88\x01\x01B\a\n" +
 	"\x05_typeB\r\n" +
-	"\v_difficulty\"f\n" +
+	"\v_difficultyB\v\n" +
+	"\t_verifiedB\b\n" +
+	"\x06_query\"f\n" +
 	"\x15ListQuestionsResponse\x12,\n" +
 	"\tquestions\x18\x01 \x03(\v2\x0e.core.QuestionR\tquestions\x12\x1f\n" +
 	"\vtotal_count\x18\x02 \x01(\x05R\n" +
-	"totalCount\"\xc5\x02\n" +
+	"totalCount\"\xe1\x02\n" +
 	"\x15CreateQuestionRequest\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12\"\n" +
 	"\n" +
@@ -1273,14 +1318,15 @@ const file_proto_core_core_proto_rawDesc = "" +
 	"difficulty\x12&\n" +
 	"\x04type\x18\x05 \x01(\x0e2\x12.core.QuestionTypeR\x04type\x12\x17\n" +
 	"\atag_ids\x18\x06 \x03(\x05R\x06tagIds\x12,\n" +
-	"\x0fexcalidraw_json\x18\a \x01(\tH\x02R\x0eexcalidrawJson\x88\x01\x01B\r\n" +
+	"\x0fexcalidraw_json\x18\a \x01(\tH\x02R\x0eexcalidrawJson\x88\x01\x01\x12\x1a\n" +
+	"\bverified\x18\b \x01(\bR\bverifiedB\r\n" +
 	"\v_content_mdB\f\n" +
 	"\n" +
 	"_answer_mdB\x12\n" +
 	"\x10_excalidraw_json\"8\n" +
 	"\x15DeleteQuestionRequest\x12\x1f\n" +
 	"\vquestion_id\x18\x01 \x01(\tR\n" +
-	"questionId\"\x97\x03\n" +
+	"questionId\"\xc5\x03\n" +
 	"\x15UpdateQuestionRequest\x12\x1f\n" +
 	"\vquestion_id\x18\x01 \x01(\tR\n" +
 	"questionId\x12\x19\n" +
@@ -1293,14 +1339,16 @@ const file_proto_core_core_proto_rawDesc = "" +
 	"difficulty\x18\x06 \x01(\x0e2\x10.core.DifficultyH\x04R\n" +
 	"difficulty\x88\x01\x01\x12\x17\n" +
 	"\atag_ids\x18\a \x03(\x05R\x06tagIds\x12,\n" +
-	"\x0fexcalidraw_json\x18\b \x01(\tH\x05R\x0eexcalidrawJson\x88\x01\x01B\b\n" +
+	"\x0fexcalidraw_json\x18\b \x01(\tH\x05R\x0eexcalidrawJson\x88\x01\x01\x12\x1f\n" +
+	"\bverified\x18\t \x01(\bH\x06R\bverified\x88\x01\x01B\b\n" +
 	"\x06_titleB\r\n" +
 	"\v_content_mdB\f\n" +
 	"\n" +
 	"_answer_mdB\a\n" +
 	"\x05_typeB\r\n" +
 	"\v_difficultyB\x12\n" +
-	"\x10_excalidraw_json\"&\n" +
+	"\x10_excalidraw_jsonB\v\n" +
+	"\t_verified\"&\n" +
 	"\x10CreateTagRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\"\"\n" +
 	"\x10DeleteTagRequest\x12\x0e\n" +

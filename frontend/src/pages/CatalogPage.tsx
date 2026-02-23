@@ -3,13 +3,13 @@ import { Link } from 'react-router-dom';
 import { useQuestionsStore } from '../stores/questions';
 import { useTagsStore } from '../stores/tags';
 import { useAuthStore } from '../stores/auth';
-import { FilterBar } from '../components/FilterBar';
+import { FilterBar, SearchInput } from '../components/FilterBar';
 import { QuestionCard } from '../components/QuestionCard';
 import { Pagination } from '../components/Pagination';
 import { BookOpen, Loader2, SearchX, Plus } from 'lucide-react';
 
 export function CatalogPage() {
-  const { items, totalCount, page, limit, isLoading, fetchQuestions, setPage } =
+  const { items, totalCount, page, limit, isLoading, isFetching, fetchQuestions, setPage } =
     useQuestionsStore();
   const fetchTags = useTagsStore((s) => s.fetchTags);
   const user = useAuthStore((s) => s.user);
@@ -38,6 +38,7 @@ export function CatalogPage() {
               Новый
             </Link>
           )}
+          <SearchInput />
         </div>
         <FilterBar />
       </div>
@@ -53,7 +54,7 @@ export function CatalogPage() {
           <p className="text-text-muted text-sm">Вопросов не найдено</p>
         </div>
       ) : (
-        <div className="grid gap-3">
+        <div className={`grid gap-3 transition-opacity ${isFetching ? 'opacity-50' : ''}`}>
           {items.map((q) => (
             <QuestionCard key={q.id} question={q} />
           ))}

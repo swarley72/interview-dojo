@@ -22,6 +22,7 @@ type CreateQuestionRequest struct {
 	Difficulty     string  `json:"difficulty" validate:"required,oneof=easy medium hard"`
 	Type           string  `json:"type" validate:"required,oneof=theory coding algorithm system_design"`
 	TagIDs         []int32 `json:"tag_ids"`
+	Verified       bool    `json:"verified"`
 }
 
 type UpdateQuestionRequest struct {
@@ -31,6 +32,7 @@ type UpdateQuestionRequest struct {
 	ExcalidrawJSON *string `json:"excalidraw_json"`
 	Difficulty     *string `json:"difficulty" validate:"omitempty,oneof=easy medium hard"`
 	Type           *string `json:"type" validate:"omitempty,oneof=theory coding algorithm system_design"`
+	Verified       *bool   `json:"verified"`
 	TagIDs         []int32 `json:"tag_ids"`
 }
 
@@ -44,6 +46,7 @@ type QuestionResponse struct {
 	ExcalidrawJSON *string       `json:"excalidraw_json"`
 	TagIDs         []int32       `json:"tag_ids"`
 	Progress       *ProgressInfo `json:"progress"`
+	Verified       bool          `json:"verified"`
 }
 
 type ListQuestionsQueryParams struct {
@@ -52,6 +55,8 @@ type ListQuestionsQueryParams struct {
 	Page       int32  `validate:"omitempty,min=1"`
 	Limit      int32  `validate:"omitempty,min=1,max=100"`
 	TagIDs     []int32
+	Query      *string
+	Verified   *bool
 }
 
 type QuestionResponseShort struct {
@@ -60,6 +65,7 @@ type QuestionResponseShort struct {
 	Difficulty string  `json:"difficulty"`
 	Type       string  `json:"type"`
 	TagIDs     []int32 `json:"tag_ids"`
+	Verified   bool    `json:"verified"`
 }
 
 type ProgressInfo struct {
@@ -106,6 +112,7 @@ func (h *Handler) CreateQuestion(w http.ResponseWriter, req *http.Request) {
 		Difficulty:     difficultyProto,
 		Type:           typeProto,
 		TagIds:         body.TagIDs,
+		Verified:       body.Verified,
 	})
 	if err != nil {
 		handleGRPCError(w, err, "failed create question")
@@ -168,6 +175,7 @@ func (h *Handler) UpdateQuestion(w http.ResponseWriter, req *http.Request) {
 		ContentMd:      body.ContentMD,
 		ExcalidrawJson: body.ExcalidrawJSON,
 		TagIds:         body.TagIDs,
+		Verified:       body.Verified,
 	})
 	if err != nil {
 		handleGRPCError(w, err, "update question failed")
@@ -253,6 +261,24 @@ func (h *Handler) ListQuestions(w http.ResponseWriter, req *http.Request) {
 		}
 		tagIDs = append(tagIDs, int32(id))
 	}
+	verifiedStr := q.Get("verified")
+	var verified *bool
+	if verifiedStr != "" {
+		switch verifiedStr {
+		case "true":
+			verified = ptr(true)
+		case "false":
+			verified = ptr(false)
+		default:
+			writeError(w, http.StatusBadRequest, "invalid verified param, expected true or false")
+			return
+		}
+	}
+
+	var querySearch *string
+	if qs := q.Get("q"); qs != "" {
+		querySearch = &qs
+	}
 
 	params := ListQuestionsQueryParams{
 		Limit:      int32(limit),
@@ -260,6 +286,8 @@ func (h *Handler) ListQuestions(w http.ResponseWriter, req *http.Request) {
 		Type:       q.Get("type"),
 		Difficulty: q.Get("difficulty"),
 		TagIDs:     tagIDs,
+		Verified:   verified,
+		Query:      querySearch,
 	}
 
 	if err := h.validate.Struct(params); err != nil {
@@ -300,6 +328,8 @@ func (h *Handler) ListQuestions(w http.ResponseWriter, req *http.Request) {
 		Difficulty: difficulty,
 		Type:       questionType,
 		TagIds:     params.TagIDs,
+		Verified:   params.Verified,
+		Query:      params.Query,
 	})
 	if err != nil {
 		handleGRPCError(w, err, "list questions failed")
@@ -326,6 +356,7 @@ func (h *Handler) ListQuestions(w http.ResponseWriter, req *http.Request) {
 			Type:       questionTypeString,
 			Difficulty: questionDifficultyString,
 			TagIDs:     qst.TagIds,
+			Verified:   qst.Verified,
 		}
 	}
 

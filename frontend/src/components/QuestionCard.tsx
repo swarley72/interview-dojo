@@ -4,7 +4,7 @@ import { DifficultyBadge } from './DifficultyBadge';
 import { TypeBadge } from './TypeBadge';
 import { TagBadge } from './TagBadge';
 import { useTagsStore } from '../stores/tags';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, ShieldCheck } from 'lucide-react';
 
 export function QuestionCard({ question }: { question: QuestionShort }) {
   const tagMap = useTagsStore((s) => s.tagMap);
@@ -18,9 +18,14 @@ export function QuestionCard({ question }: { question: QuestionShort }) {
         <h3 className="text-text-primary font-medium group-hover:text-accent transition-colors truncate">
           {question.title}
         </h3>
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 flex-wrap items-center">
           <DifficultyBadge difficulty={question.difficulty} />
           <TypeBadge type={question.type} />
+          {question.verified && (
+            <span className="flex items-center gap-1 text-xs text-green-400">
+              <ShieldCheck className="w-3.5 h-3.5" />
+            </span>
+          )}
           {question.tag_ids?.map((id) => (
             <TagBadge key={id} name={tagMap[id] ?? `${id}`} />
           ))}

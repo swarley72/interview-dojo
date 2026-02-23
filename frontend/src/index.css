@@ -16,6 +16,10 @@
   --color-text-muted: #a8a29e;
 }
 
+html {
+  overflow-y: scroll;
+}
+
 body {
   @apply bg-surface text-text-primary antialiased font-sans;
   margin: 0;

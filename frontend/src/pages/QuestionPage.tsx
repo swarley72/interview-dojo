@@ -1,15 +1,16 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useNavigate, useBlocker } from 'react-router-dom';
 import type { Question, Difficulty, QuestionType } from '../types';
 import { questionsApi } from '../api/questions';
 import { useAuthStore } from '../stores/auth';
 import { useTagsStore } from '../stores/tags';
+import { useAutosave } from '../hooks/useAutosave';
 import { QuestionView } from '../components/QuestionView';
 import { MarkdownEditor } from '../components/MarkdownEditor';
 import { ExcalidrawEditor } from '../components/ExcalidrawEditor';
 import { ConfirmModal } from '../components/ConfirmModal';
 import { TagSelector } from '../components/TagSelector';
-import { Pencil, Save, X, Loader2, Trash2 } from 'lucide-react';
+import { Pencil, Save, X, Loader2, Trash2, Check, CircleAlert } from 'lucide-react';
 
 export function QuestionPage() {
   const { id } = useParams<{ id: string }>();
@@ -28,6 +29,7 @@ export function QuestionPage() {
   const [editAnswer, setEditAnswer] = useState('');
   const [editTagIds, setEditTagIds] = useState<number[]>([]);
   const [editExcalidraw, setEditExcalidraw] = useState('');
+  const [editVerified, setEditVerified] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -41,9 +43,81 @@ export function QuestionPage() {
       editContent !== (question.content_md ?? '') ||
       editAnswer !== (question.answer_md ?? '') ||
       editExcalidraw !== (question.excalidraw_json ?? '') ||
+      editVerified !== question.verified ||
       JSON.stringify(editTagIds) !== JSON.stringify(question.tag_ids ?? [])
     );
-  }, [editing, question, editTitle, editDifficulty, editType, editContent, editAnswer, editExcalidraw, editTagIds]);
+  }, [editing, question, editTitle, editDifficulty, editType, editContent, editAnswer, editExcalidraw, editVerified, editTagIds]);
+
+  const getPayload = useCallback(
+    () => ({
+      title: editTitle,
+      difficulty: editDifficulty,
+      type: editType,
+      content_md: editContent,
+      answer_md: editAnswer,
+      excalidraw_json: editExcalidraw || undefined,
+      tag_ids: editTagIds,
+      verified: editVerified,
+    }),
+    [editTitle, editDifficulty, editType, editContent, editAnswer, editExcalidraw, editTagIds, editVerified],
+  );
+
+  const onAutoSaved = useCallback(
+    (result: unknown) => setQuestion(result as Question),
+    [],
+  );
+
+  const onAutoSaveError = useCallback(
+    (err: Error) => setError(err.message),
+    [],
+  );
+
+  const { saveStatus, triggerSave, scheduleSave } = useAutosave({
+    id,
+    editing,
+    isDirty,
+    getPayload,
+    onSaved: onAutoSaved,
+    onError: onAutoSaveError,
+    saveFn: questionsApi.update,
+  });
+
+  // Auto-save on tag changes (skip initial mount)
+  const prevTagIdsRef = useRef<number[] | null>(null);
+  useEffect(() => {
+    if (!editing) {
+      prevTagIdsRef.current = null;
+      return;
+    }
+    if (prevTagIdsRef.current === null) {
+      prevTagIdsRef.current = editTagIds;
+      return;
+    }
+    if (JSON.stringify(prevTagIdsRef.current) !== JSON.stringify(editTagIds)) {
+      prevTagIdsRef.current = editTagIds;
+      triggerSave();
+    }
+  }, [editing, editTagIds, triggerSave]);
+
+  // Skip Excalidraw onChange calls during initial mount
+  const excalidrawReady = useRef(false);
+  useEffect(() => {
+    if (!editing) {
+      excalidrawReady.current = false;
+      return;
+    }
+    const t = setTimeout(() => { excalidrawReady.current = true; }, 500);
+    return () => clearTimeout(t);
+  }, [editing]);
+
+  const handleExcalidrawChange = useCallback(
+    (value: string) => {
+      if (!excalidrawReady.current) return;
+      setEditExcalidraw(value);
+      scheduleSave();
+    },
+    [scheduleSave],
+  );
 
   const blocker = useBlocker(editing && isDirty);
 
@@ -78,6 +152,7 @@ export function QuestionPage() {
     setEditContent(question.content_md ?? '');
     setEditAnswer(question.answer_md ?? '');
     setEditExcalidraw(question.excalidraw_json ?? '');
+    setEditVerified(question.verified);
     setEditTagIds(question.tag_ids ?? []);
     setEditing(true);
   };
@@ -94,17 +169,13 @@ export function QuestionPage() {
 
   const saveEditing = async () => {
     if (!id) return;
+    if (!isDirty) {
+      setEditing(false);
+      return;
+    }
     setSaving(true);
     try {
-      const updated = await questionsApi.update(id, {
-        title: editTitle,
-        difficulty: editDifficulty,
-        type: editType,
-        content_md: editContent,
-        answer_md: editAnswer,
-        excalidraw_json: editExcalidraw || undefined,
-        tag_ids: editTagIds,
-      });
+      const updated = await questionsApi.update(id, getPayload());
       setQuestion(updated);
       setEditing(false);
     } catch (e) {
@@ -149,6 +220,21 @@ export function QuestionPage() {
         <h1 className="text-xl font-bold text-text-primary flex items-center gap-2">
           <Pencil className="w-5 h-5 text-accent" />
           Редактирование
+          {saveStatus === 'saving' && (
+            <span className="flex items-center gap-1 text-sm font-normal text-text-muted">
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />Сохранение...
+            </span>
+          )}
+          {saveStatus === 'saved' && (
+            <span className="flex items-center gap-1 text-sm font-normal text-green-400">
+              <Check className="w-3.5 h-3.5" />Сохранено
+            </span>
+          )}
+          {saveStatus === 'error' && (
+            <span className="flex items-center gap-1 text-sm font-normal text-red-400">
+              <CircleAlert className="w-3.5 h-3.5" />Ошибка
+            </span>
+          )}
         </h1>
         <input
           value={editTitle}
@@ -178,20 +264,31 @@ export function QuestionPage() {
           </select>
         </div>
         <TagSelector selected={editTagIds} onChange={setEditTagIds} />
+        <label className="flex items-center gap-2 cursor-pointer w-fit">
+          <input
+            type="checkbox"
+            checked={editVerified}
+            onChange={(e) => setEditVerified(e.target.checked)}
+            className="w-4 h-4 accent-accent rounded"
+          />
+          <span className="text-sm text-text-secondary">Verified</span>
+        </label>
         <MarkdownEditor
           value={editContent}
           onChange={setEditContent}
+          onBlur={() => triggerSave()}
           placeholder="Контент (Markdown)"
         />
         <MarkdownEditor
           value={editAnswer}
           onChange={setEditAnswer}
+          onBlur={() => triggerSave()}
           placeholder="Ответ (Markdown)"
         />
         {editType === 'system_design' && (
           <div>
             <label className="block text-sm font-medium text-text-secondary mb-2">Диаграмма</label>
-            <ExcalidrawEditor initialData={editExcalidraw || null} onChange={setEditExcalidraw} />
+            <ExcalidrawEditor initialData={editExcalidraw || null} onChange={handleExcalidrawChange} />
           </div>
         )}
         <div className="flex gap-3">

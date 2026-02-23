@@ -49,6 +49,7 @@ func (g *GRPCServer) CreateQuestion(ctx context.Context, req *corepb.CreateQuest
 		ExcalidrawJSON: req.ExcalidrawJson,
 		Type:           questionType,
 		Difficulty:     questionDifficulty,
+		Verified:       req.Verified,
 		TagIDs:         req.TagIds,
 	})
 	if err != nil {
@@ -89,6 +90,7 @@ func (g *GRPCServer) UpdateQuestion(ctx context.Context, req *corepb.UpdateQuest
 		ExcalidrawJSON: req.ExcalidrawJson,
 		Type:           questionType,
 		Difficulty:     questionDifficulty,
+		Verified:       req.Verified,
 		TagIDs:         req.TagIds,
 	})
 	if err != nil {
@@ -128,6 +130,8 @@ func (g *GRPCServer) ListQuestions(ctx context.Context, req *corepb.ListQuestion
 		Type:       questionType,
 		Difficulty: questionDifficulty,
 		TagIDs:     req.TagIds,
+		Verified:   req.Verified,
+		Query:      req.Query,
 	})
 	if err != nil {
 		return nil, mapError(err)

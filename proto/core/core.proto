@@ -45,6 +45,7 @@ message Question {
     google.protobuf.Timestamp created_at = 8;
     google.protobuf.Timestamp updated_at = 9;
     optional string excalidraw_json = 10;
+    bool verified = 11;
 }
 
 message UserProgress {
@@ -68,6 +69,8 @@ message ListQuestionsRequest {
     optional QuestionType type = 3;
     optional Difficulty difficulty = 4;
     repeated int32 tag_ids = 5;
+    optional bool verified = 6;
+    optional string query = 7;
 }
 
 message ListQuestionsResponse {
@@ -83,6 +86,7 @@ message CreateQuestionRequest {
     QuestionType type = 5;
     repeated int32 tag_ids = 6;
     optional string excalidraw_json = 7;
+    bool verified = 8;
 }
 
 message DeleteQuestionRequest {
@@ -98,6 +102,7 @@ message UpdateQuestionRequest {
     optional Difficulty difficulty = 6;
     repeated int32 tag_ids = 7;
     optional string excalidraw_json = 8;
+    optional bool verified = 9;
 }
 
 message CreateTagRequest {

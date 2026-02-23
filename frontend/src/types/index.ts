@@ -27,6 +27,7 @@ export interface Question {
   difficulty: Difficulty;
   type: QuestionType;
   tag_ids: number[];
+  verified: boolean;
   progress: Progress | null;
 }
 
@@ -36,6 +37,7 @@ export interface QuestionShort {
   difficulty: Difficulty;
   type: QuestionType;
   tag_ids: number[];
+  verified: boolean;
 }
 
 export interface ListQuestionsResponse {

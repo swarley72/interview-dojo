@@ -31,7 +31,7 @@ func (t *postgresTagRepository) GetTagByID(ctx context.Context, id int32) (Tag, 
 }
 
 func (t *postgresTagRepository) ListTags(ctx context.Context) ([]Tag, error) {
-	query := `SELECT id, name FROM tags`
+	query := `SELECT id, name FROM tags ORDER BY name ASC`
 	rows, err := t.pool.Query(ctx, query)
 	if err != nil {
 		return nil, err

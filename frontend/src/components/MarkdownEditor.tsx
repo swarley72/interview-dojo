@@ -5,11 +5,12 @@ import { Code, Eye } from 'lucide-react';
 interface Props {
   value: string;
   onChange: (value: string) => void;
+  onBlur?: () => void;
   placeholder?: string;
   rows?: number;
 }
 
-export function MarkdownEditor({ value, onChange, placeholder, rows = 8 }: Props) {
+export function MarkdownEditor({ value, onChange, onBlur, placeholder, rows = 8 }: Props) {
   const [preview, setPreview] = useState(false);
 
   const tabClass = (active: boolean) =>
@@ -47,6 +48,7 @@ export function MarkdownEditor({ value, onChange, placeholder, rows = 8 }: Props
           rows={rows}
           className="w-full bg-transparent px-3 py-2.5 text-text-primary text-sm font-mono focus:outline-none resize-y"
           placeholder={placeholder}
+          onBlur={onBlur}
         />
       )}
     </div>

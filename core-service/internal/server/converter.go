@@ -88,6 +88,7 @@ func questionToProto(q *repository.Question) (*corepb.Question, error) {
 		Difficulty:     protoDifficulty,
 		Type:           protoQuestionType,
 		TagIds:         q.TagIDs,
+		Verified:       q.Verified,
 		CreatedAt:      timestamppb.New(q.CreatedAt),
 		UpdatedAt:      timestamppb.New(q.UpdatedAt),
 	}, nil

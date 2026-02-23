@@ -6,7 +6,7 @@ import { TagBadge } from './TagBadge';
 import { MarkdownView } from './MarkdownView';
 import { ExcalidrawEditor } from './ExcalidrawEditor';
 import { useTagsStore } from '../stores/tags';
-import { Eye, BarChart3, Repeat, Calendar, Gauge, Timer } from 'lucide-react';
+import { Eye, BarChart3, Repeat, Calendar, Gauge, Timer, ShieldCheck, ShieldX } from 'lucide-react';
 
 interface Props {
   question: Question;
@@ -21,9 +21,20 @@ export function QuestionView({ question, children }: Props) {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-text-primary mb-3">{question.title}</h1>
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 flex-wrap items-center">
           <DifficultyBadge difficulty={question.difficulty} />
           <TypeBadge type={question.type} />
+          {question.verified ? (
+            <span className="flex items-center gap-1 text-xs font-medium text-green-400">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              Verified
+            </span>
+          ) : (
+            <span className="flex items-center gap-1 text-xs font-medium text-text-muted">
+              <ShieldX className="w-3.5 h-3.5" />
+              Unverified
+            </span>
+          )}
           {question.tag_ids?.map((id) => (
             <TagBadge key={id} name={tagMap[id] ?? `${id}`} />
           ))}

@@ -78,7 +78,7 @@ func (up *postgresUserProgressRepository) GetDueQuestionID(ctx context.Context, 
 	query := `
 	SELECT question_id FROM user_progress up
 	JOIN questions q ON q.id = up.question_id
-	WHERE up.user_id = $1 AND up.next_review_at <= now()
+	WHERE up.user_id = $1 AND up.next_review_at <= now() AND q.verified = TRUE
 	`
 	args := []any{userID}
 

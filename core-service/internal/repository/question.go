@@ -25,6 +25,7 @@ type Question struct {
 	ExcalidrawJSON *string
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
+	Verified       bool
 }
 
 type CreateQuestionParams struct {
@@ -35,6 +36,7 @@ type CreateQuestionParams struct {
 	ContentMD      *string
 	AnswerMD       *string
 	ExcalidrawJSON *string
+	Verified       bool
 }
 
 type UpdateQuestionParams struct {
@@ -45,6 +47,7 @@ type UpdateQuestionParams struct {
 	AnswerMD       *string
 	ExcalidrawJSON *string
 	TagIDs         []int32
+	Verified       *bool
 }
 
 type ListQuestionsFilters struct {
@@ -52,7 +55,9 @@ type ListQuestionsFilters struct {
 	Offset     int
 	Type       *string
 	Difficulty *string
+	Query      *string
 	TagIDs     []int32
+	Verified   *bool
 }
 
 type ListQuestionsResult struct {

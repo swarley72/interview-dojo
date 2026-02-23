@@ -21,9 +21,9 @@ func (q *postgresQuestionRepository) CreateQuestion(ctx context.Context, params 
 	defer tx.Rollback(ctx)
 
 	questionQuery := `
-		INSERT INTO questions (type, title, content_md, answer_md, difficulty, excalidraw_json)
-		VALUES ($1, $2, $3, $4, $5, $6)
-		RETURNING id, type, title, content_md, answer_md, difficulty, excalidraw_json, created_at, updated_at
+		INSERT INTO questions (type, title, content_md, answer_md, difficulty, excalidraw_json, verified)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		RETURNING id, type, title, content_md, answer_md, difficulty, excalidraw_json, verified, created_at, updated_at
 	`
 	questionTagsQuery := `INSERT INTO question_tags (question_id, tag_id) VALUES ($1, $2)`
 
@@ -38,6 +38,7 @@ func (q *postgresQuestionRepository) CreateQuestion(ctx context.Context, params 
 		params.AnswerMD,
 		params.Difficulty,
 		params.ExcalidrawJSON,
+		params.Verified,
 	).Scan(
 		&question.ID,
 		&question.Type,
@@ -46,6 +47,7 @@ func (q *postgresQuestionRepository) CreateQuestion(ctx context.Context, params 
 		&question.AnswerMD,
 		&question.Difficulty,
 		&question.ExcalidrawJSON,
+		&question.Verified,
 		&question.CreatedAt,
 		&question.UpdatedAt,
 	)
@@ -84,7 +86,7 @@ func (q *postgresQuestionRepository) CreateQuestion(ctx context.Context, params 
 func (q *postgresQuestionRepository) GetQuestionByID(ctx context.Context, id string) (Question, error) {
 	var question Question
 	questionQuery := `
-		SELECT id, type, title, content_md, answer_md, difficulty, excalidraw_json, created_at, updated_at
+		SELECT id, type, title, content_md, answer_md, difficulty, excalidraw_json, verified, created_at, updated_at
 		FROM questions
 		WHERE id = $1
 	`
@@ -96,6 +98,7 @@ func (q *postgresQuestionRepository) GetQuestionByID(ctx context.Context, id str
 		&question.AnswerMD,
 		&question.Difficulty,
 		&question.ExcalidrawJSON,
+		&question.Verified,
 		&question.CreatedAt,
 		&question.UpdatedAt,
 	)
@@ -160,6 +163,12 @@ func (q *postgresQuestionRepository) UpdateQuestion(ctx context.Context, id stri
 		argIndex++
 	}
 
+	if params.Verified != nil {
+		setClauses = append(setClauses, fmt.Sprintf("verified = $%d", argIndex))
+		args = append(args, *params.Verified)
+		argIndex++
+	}
+
 	if len(setClauses) == 0 && params.TagIDs == nil {
 		return q.GetQuestionByID(ctx, id)
 	}
@@ -167,7 +176,7 @@ func (q *postgresQuestionRepository) UpdateQuestion(ctx context.Context, id stri
 	setClauses = append(setClauses, "updated_at = now()")
 
 	query := fmt.Sprintf(
-		"UPDATE questions SET %s WHERE id = $%d RETURNING id, type, title, content_md, answer_md, difficulty, excalidraw_json, created_at, updated_at",
+		"UPDATE questions SET %s WHERE id = $%d RETURNING id, type, title, content_md, answer_md, difficulty, excalidraw_json, verified, created_at, updated_at",
 		strings.Join(setClauses, ", "),
 		argIndex,
 	)
@@ -182,6 +191,7 @@ func (q *postgresQuestionRepository) UpdateQuestion(ctx context.Context, id stri
 		&question.AnswerMD,
 		&question.Difficulty,
 		&question.ExcalidrawJSON,
+		&question.Verified,
 		&question.CreatedAt,
 		&question.UpdatedAt,
 	)
@@ -250,7 +260,7 @@ func (q *postgresQuestionRepository) DeleteQuestion(ctx context.Context, id stri
 }
 
 func (q *postgresQuestionRepository) ListQuestions(ctx context.Context, filters ListQuestionsFilters) (ListQuestionsResult, error) {
-	query := "SELECT id, type, title, difficulty, created_at, updated_at FROM questions"
+	query := "SELECT id, type, title, difficulty, verified, created_at, updated_at FROM questions"
 
 	var conditions []string
 	var filterArgs []any
@@ -270,9 +280,20 @@ func (q *postgresQuestionRepository) ListQuestions(ctx context.Context, filters 
 	}
 
 	if len(filters.TagIDs) > 0 {
-		conditions = append(conditions, fmt.Sprintf("id IN (SELECT question_id FROM question_tags WHERE tag_id = ANY($%d))",
-			argIndex))
+		conditions = append(conditions, fmt.Sprintf("id IN (SELECT question_id FROM question_tags WHERE tag_id = ANY($%d))", argIndex))
 		filterArgs = append(filterArgs, filters.TagIDs)
+		argIndex++
+	}
+
+	if filters.Verified != nil {
+		conditions = append(conditions, fmt.Sprintf("verified = $%d", argIndex))
+		filterArgs = append(filterArgs, *filters.Verified)
+		argIndex++
+	}
+
+	if filters.Query != nil {
+		conditions = append(conditions, fmt.Sprintf("title ILIKE $%d", argIndex))
+		filterArgs = append(filterArgs, "%"+*filters.Query+"%")
 		argIndex++
 	}
 
@@ -300,6 +321,7 @@ func (q *postgresQuestionRepository) ListQuestions(ctx context.Context, filters 
 			&question.Type,
 			&question.Title,
 			&question.Difficulty,
+			&question.Verified,
 			&question.CreatedAt,
 			&question.UpdatedAt,
 		)
@@ -338,7 +360,7 @@ func (q *postgresQuestionRepository) ListQuestions(ctx context.Context, filters 
 func (q *postgresQuestionRepository) GetNewQuestionID(ctx context.Context, userID string, filters NextQuestionFilters) (string, error) {
 	query := `
 	SELECT id FROM questions q
-	WHERE q.id NOT IN (SELECT question_id FROM user_progress WHERE user_id = $1)
+	WHERE q.id NOT IN (SELECT question_id FROM user_progress WHERE user_id = $1) AND q.verified = TRUE
 	`
 	args := []any{userID}
 	if filters.QuestionType != nil {

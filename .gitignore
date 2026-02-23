@@ -32,6 +32,7 @@ go.work.sum
 # .vscode/
 
 infra/postgres/pgdata
+dumps/
 SPEC.md
 CLAUDE.md
 .DS_Store

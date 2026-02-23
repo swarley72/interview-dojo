@@ -99,6 +99,7 @@ func questionResponseFromProto(q *corepb.Question, p *corepb.UserProgress) (*Que
 		AnswerMD:       q.AnswerMd,
 		ExcalidrawJSON: q.ExcalidrawJson,
 		Progress:       progressInfo,
+		Verified:       q.Verified,
 	}, nil
 }
 
@@ -131,3 +132,5 @@ func answerFromProto(a corepb.AnswerQuality) (string, error) {
 	}
 	return v, nil
 }
+
+func ptr[T any](v T) *T { return &v }
